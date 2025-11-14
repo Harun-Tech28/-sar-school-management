@@ -174,36 +174,41 @@ export const exportExamResults = (results: any[]) => {
 }
 
 // Generate and download report card PDF
-export const downloadReportCard = (studentData: any) => {
+export const downloadReportCard = async (studentData: any) => {
   const generator = new PDFGenerator()
+  await generator.initialize()
   generator.generateReportCard(studentData)
   generator.save(`Report_Card_${studentData.studentId}_${new Date().toISOString().split('T')[0]}.pdf`)
 }
 
 // Generate and download attendance PDF
-export const downloadAttendancePDF = (data: any) => {
+export const downloadAttendancePDF = async (data: any) => {
   const generator = new PDFGenerator()
+  await generator.initialize()
   generator.generateAttendanceReport(data)
   generator.save(`Attendance_Report_${new Date().toISOString().split('T')[0]}.pdf`)
 }
 
 // Generate and download class list PDF
-export const downloadClassListPDF = (data: any) => {
+export const downloadClassListPDF = async (data: any) => {
   const generator = new PDFGenerator()
+  await generator.initialize()
   generator.generateClassList(data)
   generator.save(`Class_List_${data.className}_${new Date().toISOString().split('T')[0]}.pdf`)
 }
 
 // Generate and download financial report PDF
-export const downloadFinancialPDF = (data: any) => {
+export const downloadFinancialPDF = async (data: any) => {
   const generator = new PDFGenerator()
+  await generator.initialize()
   generator.generateFinancialReport(data)
   generator.save(`Financial_Report_${new Date().toISOString().split('T')[0]}.pdf`)
 }
 
 // Generate and download exam results PDF
-export const downloadExamResultsPDF = (data: any) => {
+export const downloadExamResultsPDF = async (data: any) => {
   const generator = new PDFGenerator()
+  await generator.initialize()
   generator.generateExamResults(data)
   generator.save(`Exam_Results_${new Date().toISOString().split('T')[0]}.pdf`)
 }

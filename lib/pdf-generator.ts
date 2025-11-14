@@ -111,6 +111,45 @@ export class PDFGenerator {
     return yPos + 10 // Return the Y position after header
   }
 
+  // Add transparent watermark logo to page
+  private addWatermark() {
+    if (!this.logoBase64) return
+    
+    const pageWidth = this.doc.internal.pageSize.getWidth()
+    const pageHeight = this.doc.internal.pageSize.getHeight()
+    
+    try {
+      // Large transparent logo in center as watermark
+      const watermarkSize = 80
+      const watermarkX = (pageWidth - watermarkSize) / 2
+      const watermarkY = (pageHeight - watermarkSize) / 2
+      
+      // Save current graphics state
+      this.doc.saveGraphicsState()
+      
+      // Set opacity for watermark (0.1 = 10% opacity)
+      // @ts-ignore - GState is available but not in types
+      this.doc.setGState(new this.doc.GState({ opacity: 0.1 }))
+      
+      // Add watermark logo
+      this.doc.addImage(
+        this.logoBase64,
+        'PNG',
+        watermarkX,
+        watermarkY,
+        watermarkSize,
+        watermarkSize,
+        undefined,
+        'FAST'
+      )
+      
+      // Restore graphics state
+      this.doc.restoreGraphicsState()
+    } catch (error) {
+      console.error('Error adding watermark:', error)
+    }
+  }
+
   // Add footer with page numbers
   private addFooter() {
     const pageCount = this.doc.getNumberOfPages()
@@ -119,6 +158,10 @@ export class PDFGenerator {
     
     for (let i = 1; i <= pageCount; i++) {
       this.doc.setPage(i)
+      
+      // Add watermark to each page
+      this.addWatermark()
+      
       this.doc.setFontSize(8)
       this.doc.setFont('helvetica', 'normal')
       this.doc.text(
