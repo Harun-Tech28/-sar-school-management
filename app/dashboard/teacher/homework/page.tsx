@@ -148,7 +148,11 @@ export default function TeacherHomeworkPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Button>Create Assignment</Button>
+                  <Button onClick={() => {
+                    alert("Homework creation feature is under development.\n\nTo implement:\n1. Add Homework model to database\n2. Create homework API endpoints\n3. Connect form to backend\n\nThis is currently a UI mockup.")
+                  }}>
+                    Create Assignment
+                  </Button>
                   <Button variant="outline" onClick={() => setShowCreateForm(false)}>Cancel</Button>
                 </div>
               </Card>
