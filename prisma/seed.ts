@@ -468,6 +468,7 @@ async function main() {
         targetAudience: "All",
         priority: "High",
         date: new Date("2024-09-01"),
+        authorId: admin.id,
       },
     }),
     prisma.announcement.create({
@@ -477,6 +478,7 @@ async function main() {
         targetAudience: "Parents",
         priority: "Normal",
         date: new Date("2024-10-01"),
+        authorId: admin.id,
       },
     }),
     prisma.announcement.create({
@@ -486,6 +488,7 @@ async function main() {
         targetAudience: "Students",
         priority: "High",
         date: new Date("2024-10-20"),
+        authorId: admin.id,
       },
     }),
   ])
