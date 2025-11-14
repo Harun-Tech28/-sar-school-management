@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useState } from "react"
 import { 
   LayoutDashboard, 
   Users, 
@@ -18,8 +19,17 @@ import {
   BookOpen,
   FileCheck,
   UserCircle2,
-  AlertTriangle
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react"
+
+interface MenuItem {
+  label: string
+  href?: string
+  icon: any
+  subItems?: MenuItem[]
+}
 
 interface SidebarProps {
   userRole: "admin" | "teacher" | "parent" | "student"
@@ -27,9 +37,18 @@ interface SidebarProps {
 
 export function Sidebar({ userRole }: SidebarProps) {
   const pathname = usePathname()
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([])
 
-  const getMenuItems = () => {
-    const baseItems = [
+  const toggleMenu = (label: string) => {
+    setExpandedMenus(prev => 
+      prev.includes(label) 
+        ? prev.filter(item => item !== label)
+        : [...prev, label]
+    )
+  }
+
+  const getMenuItems = (): MenuItem[] => {
+    const baseItems: MenuItem[] = [
       {
         label: "Dashboard",
         href: `/dashboard/${userRole}`,
@@ -47,53 +66,71 @@ export function Sidebar({ userRole }: SidebarProps) {
         ...baseItems,
         {
           label: "User Management",
-          href: `/dashboard/${userRole}/users`,
           icon: Users,
+          subItems: [
+            {
+              label: "All Users",
+              href: `/dashboard/${userRole}/users`,
+              icon: Users,
+            },
+            {
+              label: "Students",
+              href: `/dashboard/${userRole}/students`,
+              icon: GraduationCap,
+            },
+            {
+              label: "Parents",
+              href: `/dashboard/${userRole}/parents`,
+              icon: UserCircle2,
+            },
+            {
+              label: "Teachers",
+              href: `/dashboard/${userRole}/teachers`,
+              icon: Users,
+            },
+          ]
         },
         {
-          label: "Students",
-          href: `/dashboard/${userRole}/students`,
-          icon: GraduationCap,
-        },
-        {
-          label: "Parents",
-          href: `/dashboard/${userRole}/parents`,
-          icon: UserCircle2,
-        },
-        {
-          label: "Teachers",
-          href: `/dashboard/${userRole}/teachers`,
-          icon: Users,
-        },
-        {
-          label: "Classes",
-          href: `/dashboard/${userRole}/classes`,
+          label: "Academic",
           icon: BookOpen,
-        },
-        {
-          label: "Academic Calendar",
-          href: `/dashboard/${userRole}/academic-calendar`,
-          icon: CalendarDays,
-        },
-        {
-          label: "Attendance",
-          href: `/dashboard/${userRole}/attendance-analytics`,
-          icon: ClipboardCheck,
-        },
-        {
-          label: "Exam Management",
-          href: `/dashboard/${userRole}/exams`,
-          icon: FileCheck,
-        },
-        {
-          label: "Fee Management",
-          href: `/dashboard/${userRole}/fee-management`,
-          icon: DollarSign,
+          subItems: [
+            {
+              label: "Classes",
+              href: `/dashboard/${userRole}/classes`,
+              icon: BookOpen,
+            },
+            {
+              label: "Calendar",
+              href: `/dashboard/${userRole}/academic-calendar`,
+              icon: CalendarDays,
+            },
+            {
+              label: "Attendance",
+              href: `/dashboard/${userRole}/attendance-analytics`,
+              icon: ClipboardCheck,
+            },
+            {
+              label: "Exams",
+              href: `/dashboard/${userRole}/exams`,
+              icon: FileCheck,
+            },
+          ]
         },
         {
           label: "Finance",
-          href: `/dashboard/${userRole}/finance`,
           icon: DollarSign,
+          subItems: [
+            {
+              label: "Overview",
+              href: `/dashboard/${userRole}/finance`,
+              icon: DollarSign,
+            },
+            {
+              label: "Fee Management",
+              href: `/dashboard/${userRole}/fee-management`,
+              icon: DollarSign,
+            },
+          ]
         },
         {
           label: "Reports",
@@ -132,7 +169,7 @@ export function Sidebar({ userRole }: SidebarProps) {
         {
           label: "Homework",
           href: `/dashboard/${userRole}/homework`,
-          icon: Users,
+          icon: BookOpen,
         },
         {
           label: "Report Issue",
@@ -156,7 +193,7 @@ export function Sidebar({ userRole }: SidebarProps) {
         {
           label: "Homework",
           href: `/dashboard/${userRole}/homework`,
-          icon: Users,
+          icon: BookOpen,
         },
         {
           label: "Timetable",
@@ -191,7 +228,7 @@ export function Sidebar({ userRole }: SidebarProps) {
         {
           label: "Homework",
           href: `/dashboard/${userRole}/homework`,
-          icon: Users,
+          icon: BookOpen,
         },
         {
           label: "Report Issue",
@@ -213,6 +250,79 @@ export function Sidebar({ userRole }: SidebarProps) {
     }
   }
 
+  const renderMenuItem = (item: MenuItem, index: number) => {
+    const Icon = item.icon
+    const isExpanded = expandedMenus.includes(item.label)
+    const hasSubItems = item.subItems && item.subItems.length > 0
+    const isActive = pathname === item.href
+    const isOverview = index === 0
+
+    // Check if any sub-item is active
+    const hasActiveSubItem = hasSubItems && item.subItems?.some(subItem => pathname === subItem.href)
+
+    if (hasSubItems) {
+      return (
+        <div key={item.label}>
+          <button
+            onClick={() => toggleMenu(item.label)}
+            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+              hasActiveSubItem
+                ? "bg-white/10 text-white font-medium"
+                : "text-white/90 hover:bg-white/20 hover:text-white hover:shadow-md"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <Icon size={20} />
+              <span>{item.label}</span>
+            </div>
+            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+          </button>
+          
+          {isExpanded && (
+            <div className="ml-4 mt-1 space-y-1">
+              {item.subItems?.map((subItem) => {
+                const SubIcon = subItem.icon
+                const isSubActive = pathname === subItem.href
+                
+                return (
+                  <Link
+                    key={subItem.href}
+                    href={subItem.href!}
+                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                      isSubActive
+                        ? "bg-white/10 text-white font-medium"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    <SubIcon size={18} />
+                    <span className="text-sm">{subItem.label}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href!}
+        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+          isActive && isOverview
+            ? "bg-secondary text-foreground font-semibold shadow-lg transform scale-105"
+            : isActive
+            ? "bg-white/10 text-white font-medium"
+            : "text-white/90 hover:bg-white/20 hover:text-white hover:shadow-md hover:translate-x-1"
+        }`}
+      >
+        <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
+        <span>{item.label}</span>
+      </Link>
+    )
+  }
+
   return (
     <aside className="w-64 bg-primary min-h-screen flex flex-col shadow-xl">
       {/* Logo & Title */}
@@ -222,29 +332,8 @@ export function Sidebar({ userRole }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {menuItems.map((item, index) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href
-          const isOverview = index === 0
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                isActive && isOverview
-                  ? "bg-secondary text-foreground font-semibold shadow-lg transform scale-105"
-                  : isActive
-                  ? "bg-white/10 text-white font-medium"
-                  : "text-white/90 hover:bg-white/20 hover:text-white hover:shadow-md hover:translate-x-1"
-              }`}
-            >
-              <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        {menuItems.map((item, index) => renderMenuItem(item, index))}
       </nav>
 
       {/* User Profile & Logout */}
