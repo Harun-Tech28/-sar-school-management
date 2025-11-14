@@ -30,6 +30,7 @@ export function Header({ userName, userRole, userId }: HeaderProps) {
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([])
+      setIsSearching(false)
       return
     }
 
@@ -38,6 +39,7 @@ export function Header({ userName, userRole, userId }: HeaderProps) {
     }, 300)
 
     return () => clearTimeout(timeoutId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery])
 
   const handleSearch = async (query: string) => {
@@ -251,7 +253,7 @@ export function Header({ userName, userRole, userId }: HeaderProps) {
                 <input
                   type="text"
                   value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search by name, email, role, or ID..."
                   className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#E31E24] focus:outline-none transition-all text-gray-800 placeholder:text-gray-400"
                   autoFocus
