@@ -21,7 +21,9 @@ import {
   UserCircle2,
   AlertTriangle,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Menu,
+  X
 } from "lucide-react"
 
 interface MenuItem {
@@ -38,6 +40,7 @@ interface SidebarProps {
 export function Sidebar({ userRole }: SidebarProps) {
   const pathname = usePathname()
   const [expandedMenus, setExpandedMenus] = useState<string[]>([])
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const toggleMenu = (label: string) => {
     setExpandedMenus(prev => 
@@ -45,6 +48,10 @@ export function Sidebar({ userRole }: SidebarProps) {
         ? prev.filter(item => item !== label)
         : [...prev, label]
     )
+  }
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false)
   }
 
   const getMenuItems = (): MenuItem[] => {
@@ -430,6 +437,7 @@ export function Sidebar({ userRole }: SidebarProps) {
                   <Link
                     key={subItem.href}
                     href={subItem.href!}
+                    onClick={closeMobileMenu}
                     className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
                       isSubActive
                         ? "bg-white/10 text-white font-medium"
@@ -451,6 +459,7 @@ export function Sidebar({ userRole }: SidebarProps) {
       <Link
         key={item.href}
         href={item.href!}
+        onClick={closeMobileMenu}
         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
           isActive && isOverview
             ? "bg-secondary text-foreground font-semibold shadow-lg transform scale-105"
@@ -466,31 +475,69 @@ export function Sidebar({ userRole }: SidebarProps) {
   }
 
   return (
-    <aside className="w-64 bg-primary min-h-screen flex flex-col shadow-xl">
-      {/* Logo & Title */}
-      <div className="p-6">
-        <h1 className="font-bold text-white text-2xl mb-1">SAR School</h1>
-        <p className="text-white/80 text-sm">{getRoleLabel()}</p>
-      </div>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-primary text-white rounded-lg shadow-lg"
+        aria-label="Open menu"
+      >
+        <Menu size={24} />
+      </button>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {menuItems.map((item, index) => renderMenuItem(item, index))}
-      </nav>
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={closeMobileMenu}
+        />
+      )}
 
-      {/* User Profile & Logout */}
-      <div className="p-4 border-t border-white/10">
+      {/* Sidebar */}
+      <aside className={`
+        w-64 bg-primary min-h-screen flex flex-col shadow-xl
+        fixed lg:static top-0 left-0 z-50
+        transform transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        {/* Mobile Close Button */}
         <button
-          onClick={() => {
-            localStorage.removeItem("user")
-            window.location.href = "/"
-          }}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-red-500/20 hover:text-white hover:shadow-md hover:translate-x-1 transition-all duration-200"
+          onClick={closeMobileMenu}
+          className="lg:hidden absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-lg"
+          aria-label="Close menu"
         >
-          <LogOut size={20} />
-          <span>Logout</span>
+          <X size={24} />
         </button>
-      </div>
-    </aside>
+
+        {/* Logo & Title */}
+        <div className="p-6">
+          <h1 className="font-bold text-white text-2xl mb-1">SAR School</h1>
+          <p className="text-white/80 text-sm">{getRoleLabel()}</p>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {menuItems.map((item, index) => (
+            <div key={item.label || index} onClick={item.href ? closeMobileMenu : undefined}>
+              {renderMenuItem(item, index)}
+            </div>
+          ))}
+        </nav>
+
+        {/* User Profile & Logout */}
+        <div className="p-4 border-t border-white/10">
+          <button
+            onClick={() => {
+              localStorage.removeItem("user")
+              window.location.href = "/"
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-red-500/20 hover:text-white hover:shadow-md hover:translate-x-1 transition-all duration-200"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }
