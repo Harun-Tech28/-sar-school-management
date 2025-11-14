@@ -108,6 +108,44 @@ export default function TeacherHomeworkPage() {
                       className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Attach Files (Optional)
+                    </label>
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <input
+                        type="file"
+                        id="file-upload"
+                        multiple
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || [])
+                          if (files.length > 0) {
+                            alert(`${files.length} file(s) selected: ${files.map(f => f.name).join(', ')}\n\nNote: File upload requires cloud storage setup. See HOMEWORK_FILE_UPLOAD_GUIDE.md for implementation details.`)
+                          }
+                        }}
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="cursor-pointer flex flex-col items-center"
+                      >
+                        <FileText className="w-12 h-12 text-muted-foreground mb-2" />
+                        <p className="text-sm text-foreground font-medium">
+                          Click to upload files
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          PDF, DOC, DOCX, JPG, PNG, GIF (max 10MB each)
+                        </p>
+                        <p className="text-xs text-destructive mt-2">
+                          ⚠️ File storage not configured yet
+                        </p>
+                      </label>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      📄 To enable file uploads, follow the setup guide in <code className="bg-muted px-1 py-0.5 rounded">HOMEWORK_FILE_UPLOAD_GUIDE.md</code>
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2 mt-4">
                   <Button>Create Assignment</Button>
