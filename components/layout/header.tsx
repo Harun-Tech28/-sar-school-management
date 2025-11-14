@@ -54,49 +54,52 @@ export function Header({ userName, userRole, userId }: HeaderProps) {
 
     try {
       // Search students
-      const studentsRes = await fetch('/api/students')
+      const studentsRes = await fetch('/api/students?limit=1000')
       if (studentsRes.ok) {
-        const students = await studentsRes.json()
+        const studentsData = await studentsRes.json()
+        const students = studentsData.data || []
         const matchedStudents = students.filter((s: any) =>
-          s.name?.toLowerCase().includes(lowerQuery) ||
-          s.email?.toLowerCase().includes(lowerQuery) ||
+          s.user?.fullName?.toLowerCase().includes(lowerQuery) ||
+          s.user?.email?.toLowerCase().includes(lowerQuery) ||
           s.id?.toLowerCase().includes(lowerQuery) ||
-          s.admissionNumber?.toLowerCase().includes(lowerQuery)
+          s.rollNumber?.toLowerCase().includes(lowerQuery)
         ).slice(0, 5)
         
         results.push(...matchedStudents.map((s: any) => ({
           id: s.id,
-          name: s.name,
-          email: s.email,
+          name: s.user?.fullName || 'Unknown',
+          email: s.user?.email,
           type: 'student' as const,
-          additionalInfo: s.admissionNumber ? `Admission: ${s.admissionNumber}` : undefined
+          additionalInfo: s.rollNumber ? `Roll: ${s.rollNumber}` : undefined
         })))
       }
 
       // Search teachers
-      const teachersRes = await fetch('/api/teachers')
+      const teachersRes = await fetch('/api/teachers?limit=1000')
       if (teachersRes.ok) {
-        const teachers = await teachersRes.json()
+        const teachersData = await teachersRes.json()
+        const teachers = teachersData.data || []
         const matchedTeachers = teachers.filter((t: any) =>
-          t.name?.toLowerCase().includes(lowerQuery) ||
-          t.email?.toLowerCase().includes(lowerQuery) ||
+          t.user?.fullName?.toLowerCase().includes(lowerQuery) ||
+          t.user?.email?.toLowerCase().includes(lowerQuery) ||
           t.id?.toLowerCase().includes(lowerQuery) ||
           t.subject?.toLowerCase().includes(lowerQuery)
         ).slice(0, 5)
         
         results.push(...matchedTeachers.map((t: any) => ({
           id: t.id,
-          name: t.name,
-          email: t.email,
+          name: t.user?.fullName || 'Unknown',
+          email: t.user?.email,
           type: 'teacher' as const,
           additionalInfo: t.subject ? `Subject: ${t.subject}` : undefined
         })))
       }
 
       // Search classes
-      const classesRes = await fetch('/api/classes')
+      const classesRes = await fetch('/api/classes?limit=1000')
       if (classesRes.ok) {
-        const classes = await classesRes.json()
+        const classesData = await classesRes.json()
+        const classes = classesData.data || []
         const matchedClasses = classes.filter((c: any) =>
           c.name?.toLowerCase().includes(lowerQuery) ||
           c.id?.toLowerCase().includes(lowerQuery)
@@ -106,25 +109,26 @@ export function Header({ userName, userRole, userId }: HeaderProps) {
           id: c.id,
           name: c.name,
           type: 'class' as const,
-          additionalInfo: c.teacherName ? `Teacher: ${c.teacherName}` : undefined
+          additionalInfo: c.teacher?.user?.fullName ? `Teacher: ${c.teacher.user.fullName}` : undefined
         })))
       }
 
       // Search parents (admin only)
       if (userRole === 'admin') {
-        const parentsRes = await fetch('/api/parents')
+        const parentsRes = await fetch('/api/parents?limit=1000')
         if (parentsRes.ok) {
-          const parents = await parentsRes.json()
+          const parentsData = await parentsRes.json()
+          const parents = parentsData.data || []
           const matchedParents = parents.filter((p: any) =>
-            p.name?.toLowerCase().includes(lowerQuery) ||
-            p.email?.toLowerCase().includes(lowerQuery) ||
+            p.user?.fullName?.toLowerCase().includes(lowerQuery) ||
+            p.user?.email?.toLowerCase().includes(lowerQuery) ||
             p.id?.toLowerCase().includes(lowerQuery)
           ).slice(0, 5)
           
           results.push(...matchedParents.map((p: any) => ({
             id: p.id,
-            name: p.name,
-            email: p.email,
+            name: p.user?.fullName || 'Unknown',
+            email: p.user?.email,
             type: 'parent' as const
           })))
         }
