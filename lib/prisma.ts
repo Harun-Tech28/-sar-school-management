@@ -4,8 +4,10 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Validate DATABASE_URL exists
-if (!process.env.DATABASE_URL) {
+// Validate DATABASE_URL exists (skip during build)
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
+
+if (!process.env.DATABASE_URL && !isBuildTime) {
   throw new Error('DATABASE_URL environment variable is not set')
 }
 
@@ -14,7 +16,7 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: {
     db: {
-      url: process.env.DATABASE_URL
+      url: process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
     }
   },
 })
@@ -23,10 +25,12 @@ if (process.env.NODE_ENV !== 'production') {
   globalForPrisma.prisma = prisma
 }
 
-// Test connection on startup
-prisma.$connect()
-  .then(() => console.log('✅ Prisma connected to database'))
-  .catch((error) => console.error('❌ Prisma connection failed:', error))
+// Test connection on startup (skip during build)
+if (!isBuildTime) {
+  prisma.$connect()
+    .then(() => console.log('✅ Prisma connected to database'))
+    .catch((error) => console.error('❌ Prisma connection failed:', error))
+}
 
 // Connection with retry logic and timeout
 export async function connectDB(retries = 3, timeout = 5000): Promise<PrismaClient> {
