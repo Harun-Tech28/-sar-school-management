@@ -8,8 +8,18 @@ import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter, useParams } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Search, X, Users } from "lucide-react"
 import Link from "next/link"
+
+interface Parent {
+  id: string
+  userId: string
+  user: {
+    fullName: string
+    email: string
+  }
+  phone: string
+}
 
 interface FormData {
   name: string
@@ -20,6 +30,7 @@ interface FormData {
   dateOfBirth: string
   parentName: string
   parentPhone: string
+  parentId: string | null
 }
 
 export default function EditStudentPage() {
@@ -29,6 +40,10 @@ export default function EditStudentPage() {
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showParentModal, setShowParentModal] = useState(false)
+  const [parents, setParents] = useState<Parent[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedParent, setSelectedParent] = useState<Parent | null>(null)
   const [formData, setFormData] = useState<FormData>({
     name: "Ama Boateng",
     email: "ama.boateng@school.com",
@@ -38,6 +53,7 @@ export default function EditStudentPage() {
     dateOfBirth: "2009-05-20",
     parentName: "Kwame Boateng",
     parentPhone: "0244567890",
+    parentId: null,
   })
 
   useEffect(() => {
@@ -48,7 +64,53 @@ export default function EditStudentPage() {
     }
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
+    
+    // Fetch parents list
+    fetchParents()
   }, [])
+
+  const fetchParents = async () => {
+    try {
+      const response = await fetch("/api/parents?limit=1000")
+      if (response.ok) {
+        const data = await response.json()
+        setParents(Array.isArray(data.data) ? data.data : Array.isArray(data) ? data : [])
+      }
+    } catch (error) {
+      console.error("Error fetching parents:", error)
+    }
+  }
+
+  const handleSelectParent = (parent: Parent) => {
+    setSelectedParent(parent)
+    setFormData({
+      ...formData,
+      parentId: parent.id,
+      parentName: parent.user.fullName,
+      parentPhone: parent.phone || "",
+    })
+    setShowParentModal(false)
+    setSearchTerm("")
+  }
+
+  const handleClearParent = () => {
+    setSelectedParent(null)
+    setFormData({
+      ...formData,
+      parentId: null,
+      parentName: "",
+      parentPhone: "",
+    })
+  }
+
+  const filteredParents = parents.filter(parent => {
+    const search = searchTerm.toLowerCase()
+    return (
+      parent.user.fullName.toLowerCase().includes(search) ||
+      parent.user.email.toLowerCase().includes(search) ||
+      (parent.phone || "").toLowerCase().includes(search)
+    )
+  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
@@ -164,28 +226,48 @@ export default function EditStudentPage() {
                 {/* Parent Information */}
                 <div>
                   <h3 className="text-lg font-semibold text-foreground mb-4">Parent/Guardian Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Parent/Guardian Name</label>
-                      <Input
-                        type="text"
-                        name="parentName"
-                        value={formData.parentName}
-                        onChange={handleChange}
-                        required
-                      />
+                  
+                  {selectedParent || formData.parentId ? (
+                    <div className="border border-border rounded-lg p-4 bg-muted/50">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-foreground">{formData.parentName}</p>
+                          <p className="text-sm text-muted-foreground">{formData.parentPhone}</p>
+                          {selectedParent && (
+                            <p className="text-xs text-muted-foreground mt-1">{selectedParent.user.email}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowParentModal(true)}
+                          >
+                            Change
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={handleClearParent}
+                          >
+                            <X size={16} />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Parent/Guardian Phone</label>
-                      <Input
-                        type="tel"
-                        name="parentPhone"
-                        value={formData.parentPhone}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                  </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowParentModal(true)}
+                      className="w-full gap-2"
+                    >
+                      <Users size={18} />
+                      Select Parent/Guardian
+                    </Button>
+                  )}
                 </div>
 
                 {/* Form Actions */}
@@ -202,6 +284,87 @@ export default function EditStudentPage() {
           </div>
         </main>
       </div>
+
+      {/* Parent Selection Modal */}
+      {showParentModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-border">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-foreground">Select Parent/Guardian</h2>
+                <button
+                  onClick={() => {
+                    setShowParentModal(false)
+                    setSearchTerm("")
+                  }}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              {/* Search Bar */}
+              <div className="mt-4 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search by name, email, or phone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            {/* Parents List */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {filteredParents.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  {searchTerm ? "No parents found matching your search" : "No parents available"}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredParents.map((parent) => (
+                    <button
+                      key={parent.id}
+                      onClick={() => handleSelectParent(parent)}
+                      className="w-full text-left border border-border rounded-lg p-4 hover:border-primary hover:bg-primary/5 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-medium text-foreground">{parent.user.fullName}</h3>
+                          <p className="text-sm text-muted-foreground">{parent.user.email}</p>
+                          {parent.phone && (
+                            <p className="text-sm text-muted-foreground mt-1">📞 {parent.phone}</p>
+                          )}
+                        </div>
+                        <Users size={20} className="text-muted-foreground" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowParentModal(false)
+                  setSearchTerm("")
+                }}
+                className="w-full"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
