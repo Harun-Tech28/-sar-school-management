@@ -48,22 +48,29 @@ export function Sidebar({ userRole }: SidebarProps) {
   }
 
   const getMenuItems = (): MenuItem[] => {
-    const baseItems: MenuItem[] = [
-      {
-        label: "Dashboard",
-        href: `/dashboard/${userRole}`,
-        icon: LayoutDashboard,
-      },
-      {
-        label: "Announcements",
-        href: `/dashboard/${userRole}/announcements`,
-        icon: Bell,
-      },
-    ]
-
     if (userRole === "admin") {
       return [
-        ...baseItems,
+        {
+          label: "Dashboard",
+          href: `/dashboard/${userRole}`,
+          icon: LayoutDashboard,
+        },
+        {
+          label: "Announcements",
+          icon: Bell,
+          subItems: [
+            {
+              label: "View All",
+              href: `/dashboard/${userRole}/announcements`,
+              icon: Bell,
+            },
+            {
+              label: "Create New",
+              href: `/dashboard/${userRole}/announcements/create`,
+              icon: Bell,
+            },
+          ]
+        },
         {
           label: "User Management",
           icon: Users,
@@ -134,106 +141,241 @@ export function Sidebar({ userRole }: SidebarProps) {
         },
         {
           label: "Reports",
-          href: `/dashboard/${userRole}/reports`,
           icon: FileText,
-        },
-        {
-          label: "Report Cases",
-          href: `/dashboard/${userRole}/report-cases`,
-          icon: AlertTriangle,
+          subItems: [
+            {
+              label: "All Reports",
+              href: `/dashboard/${userRole}/reports`,
+              icon: FileText,
+            },
+            {
+              label: "Report Cases",
+              href: `/dashboard/${userRole}/report-cases`,
+              icon: AlertTriangle,
+            },
+          ]
         },
         {
           label: "Settings",
-          href: `/dashboard/${userRole}/settings`,
           icon: Settings,
+          subItems: [
+            {
+              label: "General",
+              href: `/dashboard/${userRole}/settings`,
+              icon: Settings,
+            },
+          ]
         },
       ]
     } else if (userRole === "teacher") {
       return [
-        ...baseItems,
+        {
+          label: "Dashboard",
+          href: `/dashboard/${userRole}`,
+          icon: LayoutDashboard,
+        },
+        {
+          label: "Announcements",
+          icon: Bell,
+          subItems: [
+            {
+              label: "View All",
+              href: `/dashboard/${userRole}/announcements`,
+              icon: Bell,
+            },
+          ]
+        },
         {
           label: "Attendance",
-          href: `/dashboard/${userRole}/attendance`,
           icon: Calendar,
+          subItems: [
+            {
+              label: "Mark Attendance",
+              href: `/dashboard/${userRole}/attendance`,
+              icon: Calendar,
+            },
+          ]
         },
         {
           label: "Grades",
-          href: `/dashboard/${userRole}/grades`,
           icon: BarChart3,
-        },
-        {
-          label: "Performance Analysis",
-          href: `/dashboard/${userRole}/performance-analysis`,
-          icon: BarChart3,
+          subItems: [
+            {
+              label: "Manage Grades",
+              href: `/dashboard/${userRole}/grades`,
+              icon: BarChart3,
+            },
+            {
+              label: "Performance Analysis",
+              href: `/dashboard/${userRole}/performance-analysis`,
+              icon: BarChart3,
+            },
+          ]
         },
         {
           label: "Homework",
-          href: `/dashboard/${userRole}/homework`,
           icon: BookOpen,
+          subItems: [
+            {
+              label: "View Homework",
+              href: `/dashboard/${userRole}/homework`,
+              icon: BookOpen,
+            },
+          ]
         },
         {
           label: "Report Issue",
-          href: `/dashboard/${userRole}/report-cases`,
           icon: AlertTriangle,
+          subItems: [
+            {
+              label: "View Cases",
+              href: `/dashboard/${userRole}/report-cases`,
+              icon: AlertTriangle,
+            },
+          ]
         },
       ]
     } else if (userRole === "student") {
       return [
-        ...baseItems,
+        {
+          label: "Dashboard",
+          href: `/dashboard/${userRole}`,
+          icon: LayoutDashboard,
+        },
+        {
+          label: "Announcements",
+          icon: Bell,
+          subItems: [
+            {
+              label: "View All",
+              href: `/dashboard/${userRole}/announcements`,
+              icon: Bell,
+            },
+          ]
+        },
         {
           label: "My Grades",
-          href: `/dashboard/${userRole}/grades`,
           icon: BarChart3,
+          subItems: [
+            {
+              label: "View Grades",
+              href: `/dashboard/${userRole}/grades`,
+              icon: BarChart3,
+            },
+          ]
         },
         {
           label: "Attendance",
-          href: `/dashboard/${userRole}/attendance`,
           icon: Calendar,
+          subItems: [
+            {
+              label: "View Attendance",
+              href: `/dashboard/${userRole}/attendance`,
+              icon: Calendar,
+            },
+          ]
         },
         {
           label: "Homework",
-          href: `/dashboard/${userRole}/homework`,
           icon: BookOpen,
+          subItems: [
+            {
+              label: "View Homework",
+              href: `/dashboard/${userRole}/homework`,
+              icon: BookOpen,
+            },
+          ]
         },
         {
           label: "Timetable",
-          href: `/dashboard/${userRole}/timetable`,
           icon: Calendar,
+          subItems: [
+            {
+              label: "View Timetable",
+              href: `/dashboard/${userRole}/timetable`,
+              icon: Calendar,
+            },
+          ]
         },
         {
           label: "Report Issue",
-          href: `/dashboard/${userRole}/report-cases`,
           icon: AlertTriangle,
+          subItems: [
+            {
+              label: "View Cases",
+              href: `/dashboard/${userRole}/report-cases`,
+              icon: AlertTriangle,
+            },
+          ]
         },
       ]
     } else {
       // Parent
       return [
-        ...baseItems,
+        {
+          label: "Dashboard",
+          href: `/dashboard/${userRole}`,
+          icon: LayoutDashboard,
+        },
+        {
+          label: "Announcements",
+          icon: Bell,
+          subItems: [
+            {
+              label: "View All",
+              href: `/dashboard/${userRole}/announcements`,
+              icon: Bell,
+            },
+          ]
+        },
         {
           label: "Performance",
-          href: `/dashboard/${userRole}/performance`,
           icon: BarChart3,
+          subItems: [
+            {
+              label: "View Performance",
+              href: `/dashboard/${userRole}/performance`,
+              icon: BarChart3,
+            },
+            {
+              label: "Student Report",
+              href: `/dashboard/${userRole}/student-report`,
+              icon: BarChart3,
+            },
+          ]
         },
         {
           label: "Attendance",
-          href: `/dashboard/${userRole}/attendance`,
           icon: Calendar,
-        },
-        {
-          label: "Student Report",
-          href: `/dashboard/${userRole}/student-report`,
-          icon: BarChart3,
+          subItems: [
+            {
+              label: "View Attendance",
+              href: `/dashboard/${userRole}/attendance`,
+              icon: Calendar,
+            },
+          ]
         },
         {
           label: "Homework",
-          href: `/dashboard/${userRole}/homework`,
           icon: BookOpen,
+          subItems: [
+            {
+              label: "View Homework",
+              href: `/dashboard/${userRole}/homework`,
+              icon: BookOpen,
+            },
+          ]
         },
         {
           label: "Report Issue",
-          href: `/dashboard/${userRole}/report-cases`,
           icon: AlertTriangle,
+          subItems: [
+            {
+              label: "View Cases",
+              href: `/dashboard/${userRole}/report-cases`,
+              icon: AlertTriangle,
+            },
+          ]
         },
       ]
     }
