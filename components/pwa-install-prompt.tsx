@@ -58,8 +58,8 @@ export function PWAInstallPrompt() {
       </button>
       
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-12 h-12 bg-[#E31E24] rounded-lg flex items-center justify-center">
-          <Download className="text-white" size={24} />
+        <div className="flex-shrink-0 w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+          <img src="/logo-transparent.svg" alt="SAR School Logo" className="w-10 h-10" />
         </div>
         
         <div className="flex-1">
