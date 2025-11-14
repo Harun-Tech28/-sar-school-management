@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       take: 3,
       orderBy: { createdAt: "desc" },
       select: {
+        id: true,
         createdAt: true,
         user: {
           select: { fullName: true }
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     recentStudents.forEach(student => {
       activities.push({
-        id: `student_${student.createdAt.getTime()}`,
+        id: `student_${student.id}`,
         icon: "👨‍🎓",
         description: `${student.user.fullName} registered for ${student.class?.name || "a class"}`,
         timestamp: student.createdAt.getTime(),
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
         status: "PRESENT"
       },
       select: {
+        id: true,
         createdAt: true,
         classId: true
       }
@@ -63,7 +65,7 @@ export async function GET(request: NextRequest) {
       })
 
       activities.push({
-        id: `attendance_${record.createdAt.getTime()}`,
+        id: `attendance_${record.id}`,
         icon: "✅",
         description: `Attendance marked for ${classInfo?.name || "class"}`,
         timestamp: record.createdAt.getTime(),
@@ -76,6 +78,7 @@ export async function GET(request: NextRequest) {
       take: 3,
       orderBy: { createdAt: "desc" },
       select: {
+        id: true,
         createdAt: true,
         subject: true,
         examType: true,
@@ -98,7 +101,7 @@ export async function GET(request: NextRequest) {
 
     recentGrades.forEach(grade => {
       activities.push({
-        id: `grade_${grade.createdAt.getTime()}`,
+        id: `grade_${grade.id}`,
         icon: "📊",
         description: `${grade.teacher.user.fullName} posted ${grade.subject} ${grade.examType} results for ${grade.student.class?.name || "class"}`,
         timestamp: grade.createdAt.getTime(),
@@ -111,6 +114,7 @@ export async function GET(request: NextRequest) {
       take: 3,
       orderBy: { paymentDate: "desc" },
       select: {
+        id: true,
         paymentDate: true,
         amount: true,
         student: {
@@ -125,7 +129,7 @@ export async function GET(request: NextRequest) {
 
     recentPayments.forEach(payment => {
       activities.push({
-        id: `payment_${payment.paymentDate.getTime()}`,
+        id: `payment_${payment.id}`,
         icon: "💰",
         description: `${payment.student.user.fullName} paid term fees (GHS ${payment.amount.toFixed(2)})`,
         timestamp: payment.paymentDate.getTime(),
@@ -136,12 +140,17 @@ export async function GET(request: NextRequest) {
     // Recent announcements
     const recentAnnouncements = await prisma.announcement.findMany({
       take: 2,
-      orderBy: { createdAt: "desc" }
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true
+      }
     })
 
     recentAnnouncements.forEach(announcement => {
       activities.push({
-        id: `announcement_${announcement.createdAt.getTime()}`,
+        id: `announcement_${announcement.id}`,
         icon: "📢",
         description: `New announcement: ${announcement.title}`,
         timestamp: announcement.createdAt.getTime(),
