@@ -1,0 +1,567 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String              @id @default(cuid())
+  email               String              @unique
+  password            String
+  firstName           String              @default("")
+  middleName          String?
+  lastName            String              @default("")
+  fullName            String              // Computed field for backward compatibility
+  phone               String?
+  role                Role
+  accountStatus       AccountStatus       @default(ACTIVE)
+  rejectionReason     String?
+  approvedBy          String?
+  approvedAt          DateTime?
+  resetToken          String?             @unique
+  resetTokenExpiry    DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  admin               Admin?
+  parent              Parent?
+  student             Student?
+  teacher             Teacher?
+  announcements       Announcement[]
+  registrationRequest RegistrationRequest?
+
+  @@index([email])
+  @@index([role])
+  @@index([resetToken])
+  @@index([accountStatus])
+}
+
+model Student {
+  id                  String               @id @default(cuid())
+  userId              String               @unique
+  rollNumber          String               @unique
+  classId             String
+  dateOfBirth         DateTime
+  gender              String
+  address             String
+  phone               String?
+  parentId            String?
+  admissionType       String               @default("NEW") // NEW or CONTINUING
+  admissionDate       DateTime             @default(now())
+  previousSchool      String?              // For new admissions
+  previousClass       String?              // For new admissions
+  transferCertificate Boolean              @default(false) // TC received
+  medicalRecords      Boolean              @default(false) // Medical records submitted
+  status              String               @default("ACTIVE") // ACTIVE, GRADUATED, TRANSFERRED, DROPPED
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  attendance          Attendance[]
+  feePayments         FeePayment[]
+  grades              Grade[]
+  homeworkSubmissions HomeworkSubmission[]
+  class               Class                @relation(fields: [classId], references: [id])
+  parent              Parent?              @relation(fields: [parentId], references: [id])
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rollNumber])
+  @@index([classId])
+  @@index([parentId])
+  @@index([admissionType])
+  @@index([status])
+}
+
+model Teacher {
+  id              String         @id @default(cuid())
+  userId          String         @unique
+  employeeId      String?        @unique
+  subject         String         @default("General") // Primary subject taught
+  subjects        String[]       @default([]) // Additional subjects
+  phone           String?
+  joinDate        DateTime       @default(now())
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  classes         ClassTeacher[]
+  primaryClasses  Class[]        @relation("ClassTeacher") // Classes where this teacher is the primary teacher
+  grades          Grade[]
+  homework        Homework[]
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+}
+
+model Parent {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  phone      String
+  address    String    @default("")
+  occupation String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  children   Student[]
+}
+
+model Admin {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  department String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Class {
+  id           String         @id @default(cuid())
+  name         String         @unique
+  form         String         @default("Form 1") // e.g., "Form 1", "Form 2"
+  level        String         @default("") // Keep for backward compatibility
+  section      String         @default("") // Keep for backward compatibility
+  academicYear String         @default("2025")
+  room         String         @default("TBA") // Room number
+  capacity     Int            @default(40)
+  teacherId    String?        // Primary class teacher
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  attendance   Attendance[]
+  teachers     ClassTeacher[]
+  homework     Homework[]
+  students     Student[]
+  teacher      Teacher?       @relation("ClassTeacher", fields: [teacherId], references: [id])
+
+  @@index([academicYear])
+}
+
+model ClassTeacher {
+  id        String  @id @default(cuid())
+  classId   String
+  teacherId String
+  subject   String
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, teacherId, subject])
+  @@index([classId])
+  @@index([teacherId])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  studentId String
+  classId   String
+  date      DateTime
+  status    AttendanceStatus
+  remarks   String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  class     Class            @relation(fields: [classId], references: [id])
+  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date])
+  @@index([studentId])
+  @@index([classId])
+  @@index([date])
+}
+
+model Homework {
+  id          String               @id @default(cuid())
+  title       String
+  description String
+  subject     String
+  classId     String
+  teacherId   String
+  dueDate     DateTime
+  totalMarks  Int?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  class       Class                @relation(fields: [classId], references: [id])
+  teacher     Teacher              @relation(fields: [teacherId], references: [id])
+  submissions HomeworkSubmission[]
+
+  @@index([classId])
+  @@index([teacherId])
+  @@index([dueDate])
+}
+
+model HomeworkSubmission {
+  id          String           @id @default(cuid())
+  homeworkId  String
+  studentId   String
+  submittedAt DateTime?
+  grade       Int?
+  feedback    String?
+  status      SubmissionStatus
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  homework    Homework         @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([homeworkId, studentId])
+  @@index([homeworkId])
+  @@index([studentId])
+  @@index([status])
+}
+
+model Exam {
+  id           String   @id @default(cuid())
+  name         String   // e.g., "End of Term 1 Examination"
+  examType     String   // e.g., "Mid-Term", "End of Term", "Mock"
+  term         String   // "Term 1", "Term 2", "Term 3"
+  academicYear String   // "2025"
+  startDate    DateTime
+  endDate      DateTime
+  subjects     String[] // Array of subjects included
+  classes      String[] // Array of class IDs
+  status       String   @default("SCHEDULED") // SCHEDULED, ONGOING, COMPLETED
+  createdBy    String   // Admin user ID
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([term, academicYear])
+  @@index([status])
+}
+
+model Grade {
+  id           String   @id @default(cuid())
+  studentId    String
+  teacherId    String
+  subject      String
+  examType     String
+  marks        Float
+  totalMarks   Float
+  term         String
+  academicYear String
+  remarks      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher      Teacher  @relation(fields: [teacherId], references: [id])
+
+  @@index([studentId])
+  @@index([teacherId])
+  @@index([academicYear])
+  @@index([term])
+}
+
+model FeeStructure {
+  id           String   @id @default(cuid())
+  className    String
+  academicYear String
+  tuition      Float
+  textbooks    Float
+  uniform      Float
+  pta          Float
+  other        Float?
+  total        Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([className, academicYear])
+  @@index([academicYear])
+}
+
+model FeePayment {
+  id            String   @id @default(cuid())
+  studentId     String
+  amount        Float
+  paymentDate   DateTime
+  paymentMethod String
+  term          String
+  academicYear  String
+  receiptNumber String   @unique
+  remarks       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([academicYear])
+  @@index([receiptNumber])
+}
+
+model Announcement {
+  id             String   @id @default(cuid())
+  title          String
+  content        String
+  category       String   @default("General") // General, Academic, Event, Administrative, Sports
+  priority       String   @default("Normal") // Low, Normal, High, Urgent
+  targetAudience String   @default("All") // All, Students, Parents, Teachers, Staff
+  date           DateTime @default(now())
+  authorId       String   @default("system") // Default to system for existing records
+  author         User?    @relation(fields: [authorId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([category])
+  @@index([priority])
+  @@index([date])
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  PARENT
+  STUDENT
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+enum SubmissionStatus {
+  PENDING
+  SUBMITTED
+  GRADED
+  LATE
+}
+
+// Financial Management Models
+
+model Income {
+  id              String   @id @default(cuid())
+  category        String   // FEES, DONATIONS, GRANTS, EVENTS, SALES, OTHER
+  subcategory     String?  // Specific type within category
+  amount          Float
+  date            DateTime
+  paymentMethod   String   // CASH, BANK_TRANSFER, MOBILE_MONEY, CHEQUE, CARD
+  source          String   // Who paid (student name, donor name, etc.)
+  sourceId        String?  // Student ID if applicable
+  receiptNumber   String   @unique
+  description     String
+  academicYear    String
+  term            String?
+  recordedBy      String   // User ID who recorded this
+  verified        Boolean  @default(false)
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  attachments     String[] // URLs to receipts/documents
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@index([date])
+  @@index([academicYear])
+  @@index([sourceId])
+  @@index([receiptNumber])
+}
+
+model Expense {
+  id              String   @id @default(cuid())
+  category        String   // SALARIES, UTILITIES, MAINTENANCE, SUPPLIES, TRANSPORT, FOOD, OTHER
+  subcategory     String?  // Specific type within category
+  amount          Float
+  date            DateTime
+  paymentMethod   String   // CASH, BANK_TRANSFER, MOBILE_MONEY, CHEQUE, CARD
+  vendor          String   // Who was paid
+  invoiceNumber   String?
+  description     String
+  academicYear    String
+  term            String?
+  recordedBy      String   // User ID who recorded this
+  approved        Boolean  @default(false)
+  approvedBy      String?
+  approvedAt      DateTime?
+  attachments     String[] // URLs to invoices/receipts
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([category])
+  @@index([date])
+  @@index([academicYear])
+  @@index([approved])
+}
+
+model Budget {
+  id           String   @id @default(cuid())
+  category     String   // Expense category
+  subcategory  String?
+  amount       Float    // Budgeted amount
+  spent        Float    @default(0)
+  academicYear String
+  term         String?
+  description  String?
+  createdBy    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([category, subcategory, academicYear, term])
+  @@index([academicYear])
+  @@index([category])
+}
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  accountName   String
+  accountNumber String   @unique
+  bankName      String
+  accountType   String   // CURRENT, SAVINGS
+  balance       Float    @default(0)
+  currency      String   @default("GHS")
+  isActive      Boolean  @default(true)
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model FinancialTransaction {
+  id              String   @id @default(cuid())
+  type            String   // INCOME, EXPENSE, TRANSFER
+  amount          Float
+  date            DateTime
+  fromAccount     String?  // Bank account ID
+  toAccount       String?  // Bank account ID
+  category        String
+  description     String
+  referenceNumber String?
+  recordedBy      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([type])
+  @@index([date])
+  @@index([fromAccount])
+  @@index([toAccount])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Salary {
+  id              String   @id @default(cuid())
+  employeeId      String   // Teacher or Staff ID
+  employeeType    String   // TEACHER, STAFF
+  month           String   // YYYY-MM format
+  basicSalary     Float
+  allowances      Float    @default(0)
+  bonuses         Float    @default(0)
+  grossSalary     Float
+  deductions      Float    @default(0)
+  netSalary       Float
+  paymentDate     DateTime?
+  paymentMethod   String?
+  status          String   @default("PENDING") // PENDING, PAID, OVERDUE
+  remarks         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([employeeId, month])
+  @@index([employeeId])
+  @@index([month])
+  @@index([status])
+}
+
+model Vendor {
+  id              String   @id @default(cuid())
+  name            String
+  contactPerson   String?
+  phone           String
+  email           String?
+  address         String?
+  category        String   // SUPPLIER, CONTRACTOR, SERVICE_PROVIDER, OTHER
+  paymentTerms    String?  // NET_30, NET_60, IMMEDIATE
+  bankDetails     String?
+  taxId           String?
+  status          String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([category])
+}
+
+model Asset {
+  id                  String   @id @default(cuid())
+  name                String
+  category            String   // FURNITURE, EQUIPMENT, VEHICLE, BUILDING, LAND, OTHER
+  purchaseDate        DateTime
+  purchasePrice       Float
+  currentValue        Float
+  depreciationRate    Float    @default(0)
+  location            String?
+  condition           String   @default("GOOD") // EXCELLENT, GOOD, FAIR, POOR
+  serialNumber        String?
+  warranty            String?
+  maintenanceSchedule String?
+  lastMaintenance     DateTime?
+  status              String   @default("ACTIVE") // ACTIVE, DISPOSED, LOST, DAMAGED
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+}
+
+model PettyCash {
+  id              String   @id @default(cuid())
+  date            DateTime
+  type            String   // DISBURSEMENT, REPLENISHMENT
+  amount          Float
+  purpose         String?
+  receivedBy      String?
+  approvedBy      String?
+  voucherNumber   String?
+  balance         Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([date])
+  @@index([type])
+}
+
+enum AccountStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+}
+
+model RegistrationRequest {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  role            Role
+  submittedAt     DateTime      @default(now())
+  reviewedAt      DateTime?
+  reviewedBy      String?       // Admin user ID
+  status          AccountStatus @default(PENDING)
+  rejectionReason String?
+  additionalInfo  Json?         // Role-specific data (occupation, subjects, class preference, etc.)
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([submittedAt])
+  @@index([role])
+}
+
+model Report {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  category    String   // TECHNICAL, ACADEMIC, FACILITY, SAFETY, BULLYING, OTHER
+  priority    String   @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED, CLOSED
+  reportedBy  String   // User ID
+  assignedTo  String?  // Admin/Staff ID who will handle it
+  location    String?  // Where the issue occurred
+  attachments String[] // URLs to images/documents
+  resolution  String?  // How it was resolved
+  resolvedAt  DateTime?
+  resolvedBy  String?  // User ID who resolved it
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([reportedBy])
+  @@index([status])
+  @@index([category])
+  @@index([priority])
+  @@index([createdAt])
+}

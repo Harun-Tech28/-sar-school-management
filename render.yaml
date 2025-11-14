@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sar-educational-complex
+    env: node
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: Downloads/SAR_EDU
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0

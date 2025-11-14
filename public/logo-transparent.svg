@@ -1,0 +1,33 @@
+<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+  <!-- Transparent background -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E31E24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B71C1C;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Outer circle with shadow -->
+  <circle cx="150" cy="150" r="135" fill="url(#grad1)" filter="url(#shadow)"/>
+  
+  <!-- Inner circle for depth -->
+  <circle cx="150" cy="150" r="125" fill="none" stroke="white" stroke-width="2" opacity="0.3"/>
+  
+  <!-- School initials - large and bold -->
+  <text x="150" y="175" font-family="Arial, Helvetica, sans-serif" font-size="90" 
+        font-weight="bold" fill="white" text-anchor="middle" letter-spacing="2">SAR</text>
+  
+  <!-- Decorative line -->
+  <line x1="80" y1="190" x2="220" y2="190" stroke="white" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Subtitle -->
+  <text x="150" y="215" font-family="Arial, Helvetica, sans-serif" font-size="20" 
+        font-weight="normal" fill="white" text-anchor="middle" opacity="0.95">Educational Complex</text>
+  
+  <!-- Small decorative elements -->
+  <circle cx="70" cy="150" r="4" fill="white" opacity="0.4"/>
+  <circle cx="230" cy="150" r="4" fill="white" opacity="0.4"/>
+</svg>
