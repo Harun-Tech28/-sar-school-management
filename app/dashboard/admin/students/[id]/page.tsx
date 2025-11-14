@@ -381,9 +381,9 @@ export default function EditStudentPage() {
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-medium text-foreground">{parent.user.fullName}</h3>
-                          <p className="text-sm text-muted-foreground">{parent.user.email}</p>
-                          {parent.phone && (
+                          <h3 className="font-medium text-foreground">{parent?.user?.fullName || "Unknown"}</h3>
+                          <p className="text-sm text-muted-foreground">{parent?.user?.email || "No email"}</p>
+                          {parent?.phone && (
                             <p className="text-sm text-muted-foreground mt-1">📞 {parent.phone}</p>
                           )}
                         </div>
