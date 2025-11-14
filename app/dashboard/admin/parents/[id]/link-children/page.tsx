@@ -138,11 +138,21 @@ export default function LinkChildrenPage() {
     }
   }
 
-  const filteredStudents = Array.isArray(students) ? students.filter(student =>
-    student.user.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.admissionNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (student.class?.name || '').toLowerCase().includes(searchTerm.toLowerCase())
-  ) : []
+  const filteredStudents = Array.isArray(students) ? students.filter(student => {
+    try {
+      const fullName = student?.user?.fullName || ''
+      const admissionNumber = student?.admissionNumber || ''
+      const className = student?.class?.name || ''
+      const search = searchTerm.toLowerCase()
+      
+      return fullName.toLowerCase().includes(search) ||
+             admissionNumber.toLowerCase().includes(search) ||
+             className.toLowerCase().includes(search)
+    } catch (err) {
+      console.error('Error filtering student:', err, student)
+      return false
+    }
+  }) : []
 
   if (loading) {
     return (
@@ -194,10 +204,22 @@ export default function LinkChildrenPage() {
             type="text"
             placeholder="Search students by name, admission number, or class..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              try {
+                setSearchTerm(e.target.value || '')
+              } catch (err) {
+                console.error('Search error:', err)
+                setSearchTerm('')
+              }
+            }}
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
+        {students.length > 0 && (
+          <p className="text-sm text-gray-500 mt-2">
+            Showing {filteredStudents.length} of {students.length} students
+          </p>
+        )}
       </div>
 
       {/* Students List */}
