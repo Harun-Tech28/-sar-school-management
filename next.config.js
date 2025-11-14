@@ -18,6 +18,19 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Optimize build performance
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  // Reduce build output
+  output: 'standalone',
+  // Optimize production builds
+  productionBrowserSourceMaps: false,
+  // Faster builds
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
 }
 
 module.exports = nextConfig
