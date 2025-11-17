@@ -51,8 +51,12 @@ export default function EditClassPage() {
     // Fetch class data from API
     const fetchClassData = async () => {
       try {
+        console.log('[Edit Class] Fetching class with ID:', classId)
         const response = await fetch(`/api/classes/${classId}`)
+        console.log('[Edit Class] Response status:', response.status)
+        
         const result = await response.json()
+        console.log('[Edit Class] Response data:', result)
 
         if (result.success && result.data) {
           setFormData({
@@ -64,14 +68,16 @@ export default function EditClassPage() {
             room: result.data.room,
             capacity: result.data.capacity,
           })
+          console.log('[Edit Class] Class data loaded successfully')
         } else {
-          toast.error("Class not found")
-          router.push("/dashboard/admin/classes")
+          console.error('[Edit Class] Class not found:', result.error)
+          toast.error(result.error || "Class not found")
+          setTimeout(() => router.push("/dashboard/admin/classes"), 2000)
         }
       } catch (error) {
-        console.error("Error fetching class:", error)
-        toast.error("Failed to load class data")
-        router.push("/dashboard/admin/classes")
+        console.error("[Edit Class] Error fetching class:", error)
+        toast.error("Failed to load class data. Check console for details.")
+        setTimeout(() => router.push("/dashboard/admin/classes"), 2000)
       }
     }
 
