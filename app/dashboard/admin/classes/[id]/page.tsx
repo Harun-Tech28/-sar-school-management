@@ -48,54 +48,34 @@ export default function EditClassPage() {
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
 
-    // Load class data (in a real app, this would fetch from API)
-    // For now, using demo data
-    const demoClasses: ClassData[] = [
-      {
-        id: "1",
-        name: "Form 1A",
-        form: "Form 1",
-        teacher: "Mr. Agyeman",
-        studentCount: 38,
-        room: "101",
-        capacity: 40,
-      },
-      {
-        id: "2",
-        name: "Form 1B",
-        form: "Form 1",
-        teacher: "Miss Akosua",
-        studentCount: 35,
-        room: "102",
-        capacity: 40,
-      },
-      {
-        id: "3",
-        name: "Form 2A",
-        form: "Form 2",
-        teacher: "Mr. Boateng",
-        studentCount: 36,
-        room: "201",
-        capacity: 40,
-      },
-      {
-        id: "4",
-        name: "Form 3C",
-        form: "Form 3",
-        teacher: "Mrs. Mensah",
-        studentCount: 32,
-        room: "301",
-        capacity: 40,
-      },
-    ]
+    // Fetch class data from API
+    const fetchClassData = async () => {
+      try {
+        const response = await fetch(`/api/classes/${classId}`)
+        const result = await response.json()
 
-    const classData = demoClasses.find((c) => c.id === classId)
-    if (classData) {
-      setFormData(classData)
-    } else {
-      toast.error("Class not found")
-      router.push("/dashboard/admin/classes")
+        if (result.success && result.data) {
+          setFormData({
+            id: result.data.id,
+            name: result.data.name,
+            form: result.data.form,
+            teacher: result.data.teacher,
+            studentCount: result.data.studentCount,
+            room: result.data.room,
+            capacity: result.data.capacity,
+          })
+        } else {
+          toast.error("Class not found")
+          router.push("/dashboard/admin/classes")
+        }
+      } catch (error) {
+        console.error("Error fetching class:", error)
+        toast.error("Failed to load class data")
+        router.push("/dashboard/admin/classes")
+      }
     }
+
+    fetchClassData()
   }, [classId, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,17 +83,27 @@ export default function EditClassPage() {
     setIsLoading(true)
 
     try {
-      // In a real app, this would call an API endpoint
-      // await fetch(`/api/classes/${classId}`, {
-      //   method: 'PUT',
-      //   body: JSON.stringify(formData)
-      // })
+      const response = await fetch(`/api/classes/${classId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          form: formData.form,
+          room: formData.room,
+          capacity: formData.capacity,
+        }),
+      })
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const result = await response.json()
 
-      toast.success("Class updated successfully!")
-      router.push("/dashboard/admin/classes")
+      if (result.success) {
+        toast.success("Class updated successfully!")
+        router.push("/dashboard/admin/classes")
+      } else {
+        toast.error(result.error || "Failed to update class")
+      }
     } catch (error) {
       console.error("Error updating class:", error)
       toast.error("Failed to update class")
