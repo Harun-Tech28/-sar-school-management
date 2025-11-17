@@ -2,11 +2,15 @@
   "name": "SAR Educational Complex",
   "short_name": "SAR EDU",
   "description": "School Management System for SAR Educational Complex",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#E31E24",
   "orientation": "portrait-primary",
+  "dir": "ltr",
+  "lang": "en",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/logo-transparent.svg",
@@ -41,5 +45,37 @@
       "type": "image/png",
       "form_factor": "wide"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Mark Attendance",
+      "short_name": "Attendance",
+      "description": "Quick access to attendance marking",
+      "url": "/dashboard/admin/attendance?source=shortcut",
+      "icons": [{ "src": "/icon-light-32x32.png", "sizes": "32x32" }]
+    },
+    {
+      "name": "View Students",
+      "short_name": "Students",
+      "description": "View and manage students",
+      "url": "/dashboard/admin/students?source=shortcut",
+      "icons": [{ "src": "/icon-light-32x32.png", "sizes": "32x32" }]
+    },
+    {
+      "name": "Announcements",
+      "short_name": "News",
+      "description": "View school announcements",
+      "url": "/dashboard/admin/announcements?source=shortcut",
+      "icons": [{ "src": "/icon-light-32x32.png", "sizes": "32x32" }]
+    }
+  ],
+  "share_target": {
+    "action": "/dashboard/admin/announcements/create",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text"
+    }
+  }
 }
