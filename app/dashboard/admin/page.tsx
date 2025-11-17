@@ -40,6 +40,60 @@ export default function AdminDashboard() {
   const [timelineActivities] = useState(generateSampleActivities())
   const [loading, setLoading] = useState(true)
 
+  // Function to fetch dashboard data
+  const fetchDashboardData = () => {
+    // Fetch real counts from database
+    fetch("/api/dashboard/stats")
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setCounts({
+            students: data.data.students,
+            teachers: data.data.teachers,
+            parents: data.data.parents,
+            classes: data.data.classes
+          })
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching dashboard stats:", error)
+        setCounts({ students: 0, teachers: 0, parents: 0, classes: 0 })
+      })
+
+    // Fetch analytics data
+    fetch("/api/dashboard/analytics")
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setAnalytics({
+            financialNet: data.data.financialNet || 0,
+            performanceAverage: data.data.performanceAverage || 0,
+            recentReports: data.data.recentReports || 0
+          })
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching analytics:", error)
+        setAnalytics({ financialNet: 0, performanceAverage: 0, recentReports: 0 })
+      })
+
+    // Fetch pending registrations
+    fetch("/api/admin/pending-users")
+      .then(response => response.json())
+      .then(data => {
+        if (data.success || data.users) {
+          const users = data.users || []
+          setPendingCount(users.length)
+          setPendingUsers(users.slice(0, 3)) // Get first 3 for preview
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching pending users:", error)
+        setPendingCount(0)
+        setPendingUsers([])
+      })
+  }
+
   useEffect(() => {
     const userString = localStorage.getItem("user")
 
@@ -72,56 +126,13 @@ export default function AdminDashboard() {
       setIsAuthenticated(true)
       setLoading(false)
       
-      // Fetch real counts from database
-      fetch("/api/dashboard/stats")
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            setCounts({
-              students: data.data.students,
-              teachers: data.data.teachers,
-              parents: data.data.parents,
-              classes: data.data.classes
-            })
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching dashboard stats:", error)
-          setCounts({ students: 0, teachers: 0, parents: 0, classes: 0 })
-        })
+      // Initial data fetch
+      fetchDashboardData()
 
-      // Fetch analytics data
-      fetch("/api/dashboard/analytics")
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            setAnalytics({
-              financialNet: data.data.financialNet || 0,
-              performanceAverage: data.data.performanceAverage || 0,
-              recentReports: data.data.recentReports || 0
-            })
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching analytics:", error)
-          setAnalytics({ financialNet: 0, performanceAverage: 0, recentReports: 0 })
-        })
-
-      // Fetch pending registrations
-      fetch("/api/admin/pending-users")
-        .then(response => response.json())
-        .then(data => {
-          if (data.success || data.users) {
-            const users = data.users || []
-            setPendingCount(users.length)
-            setPendingUsers(users.slice(0, 3)) // Get first 3 for preview
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching pending users:", error)
-          setPendingCount(0)
-          setPendingUsers([])
-        })
+      // Auto-refresh every 30 seconds
+      const refreshInterval = setInterval(() => {
+        fetchDashboardData()
+      }, 30000) // 30 seconds
 
       // Set sample activities
       setActivities([
@@ -162,6 +173,9 @@ export default function AdminDashboard() {
           onClick: () => router.push('/dashboard/admin/reports')
         },
       ])
+
+      // Cleanup interval on unmount
+      return () => clearInterval(refreshInterval)
     } catch (error) {
       console.log("[v0] Error parsing user data:", error)
       localStorage.removeItem("user")

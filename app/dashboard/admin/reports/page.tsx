@@ -102,14 +102,26 @@ export default function ReportsPage() {
         })}
       </div>
 
-      <div className="mt-8 p-6 bg-blue-50 rounded-lg border border-blue-200">
-        <h3 className="font-semibold text-blue-900 mb-2">📊 Report Features</h3>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Export reports to PDF and Excel</li>
-          <li>• Filter by date range, class, or student</li>
-          <li>• Visual charts and graphs</li>
-          <li>• Real-time data updates</li>
-        </ul>
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
+          <h3 className="font-semibold text-blue-900 mb-2">📊 Report Features</h3>
+          <ul className="text-sm text-blue-800 space-y-1">
+            <li>• Export reports to PDF and Excel</li>
+            <li>• Filter by date range, class, or student</li>
+            <li>• Visual charts and graphs</li>
+            <li>• Comprehensive analytics</li>
+          </ul>
+        </div>
+
+        <div className="p-6 bg-green-50 rounded-lg border border-green-200">
+          <h3 className="font-semibold text-green-900 mb-2">🔄 Automatic Updates</h3>
+          <ul className="text-sm text-green-800 space-y-1">
+            <li>• Reports auto-refresh every 30 seconds</li>
+            <li>• Real-time data from database</li>
+            <li>• Manual refresh button available</li>
+            <li>• Always shows current information</li>
+          </ul>
+        </div>
       </div>
         </main>
       </div>
