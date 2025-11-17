@@ -63,8 +63,25 @@ export default function SignupPage() {
           </div>
         </div>
 
+        {/* Approval Notice */}
+        <div className="mt-6 bg-white/20 backdrop-blur-md rounded-xl p-4 border border-white/30">
+          <div className="flex items-start gap-3">
+            <div className="bg-white/30 rounded-full p-2 flex-shrink-0">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm mb-1">Account Approval Required</p>
+              <p className="text-white/90 text-xs leading-relaxed">
+                After registration, your account will be reviewed by our admin team. You'll be able to login once approved. This typically takes 1-2 business days.
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Role Selection Guide */}
-        <div className="mt-6 grid grid-cols-2 gap-3">
+        <div className="mt-4 grid grid-cols-3 gap-3">
           <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 hover:bg-white/30 transition-all">
             <span className="text-3xl block mb-2">👨‍🎓</span>
             <p className="text-white text-xs font-bold mb-1">Student</p>
@@ -79,11 +96,6 @@ export default function SignupPage() {
             <span className="text-3xl block mb-2">👨‍🏫</span>
             <p className="text-white text-xs font-bold mb-1">Teacher</p>
             <p className="text-white/80 text-xs">Manage classes & grades</p>
-          </div>
-          <div className="bg-white/20 backdrop-blur-md rounded-xl p-4 hover:bg-white/30 transition-all">
-            <span className="text-3xl block mb-2">👨‍💼</span>
-            <p className="text-white text-xs font-bold mb-1">Admin</p>
-            <p className="text-white/80 text-xs">Manage entire school</p>
           </div>
         </div>
 

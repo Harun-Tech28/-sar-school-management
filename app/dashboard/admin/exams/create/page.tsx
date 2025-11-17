@@ -5,27 +5,28 @@ import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus, X } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { SUBJECTS_BY_LEVEL } from "@/lib/config/ghana-education"
 
 interface Class {
   id: string
   name: string
+  level?: string
+  form?: string
 }
 
-const SUBJECTS = [
-  "Mathematics",
-  "English",
-  "Science",
-  "Social Studies",
-  "ICT",
-  "French",
-  "Religious & Moral Education",
-  "Creative Arts",
-  "Physical Education",
-  "Ghanaian Language",
-]
+// Get all unique subjects from all levels
+const getAllSubjects = () => {
+  const allSubjects = new Set<string>()
+  Object.values(SUBJECTS_BY_LEVEL).forEach(subjects => {
+    subjects.forEach(subject => allSubjects.add(subject))
+  })
+  return Array.from(allSubjects).sort()
+}
+
+const DEFAULT_SUBJECTS = getAllSubjects()
 
 export default function CreateExamPage() {
   const router = useRouter()
@@ -44,6 +45,11 @@ export default function CreateExamPage() {
     classes: [] as string[],
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [customSubject, setCustomSubject] = useState("")
+  const [showCustomSubjectInput, setShowCustomSubjectInput] = useState(false)
+  const [customClass, setCustomClass] = useState("")
+  const [showCustomClassInput, setShowCustomClassInput] = useState(false)
+  const [customClasses, setCustomClasses] = useState<string[]>([])
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}")
@@ -93,7 +99,7 @@ export default function CreateExamPage() {
       newErrors.subjects = "At least one subject is required"
     }
 
-    if (formData.classes.length === 0) {
+    if (formData.classes.length === 0 && customClasses.length === 0) {
       newErrors.classes = "At least one class is required"
     }
 
@@ -109,6 +115,9 @@ export default function CreateExamPage() {
     setLoading(true)
 
     try {
+      // Combine selected class IDs and custom class names
+      const allClasses = [...formData.classes, ...customClasses]
+
       const response = await fetch("/api/exams", {
         method: "POST",
         headers: {
@@ -116,6 +125,7 @@ export default function CreateExamPage() {
         },
         body: JSON.stringify({
           ...formData,
+          classes: allClasses,
           createdBy: userId,
         }),
       })
@@ -151,6 +161,64 @@ export default function CreateExamPage() {
         ? prev.classes.filter((c) => c !== classId)
         : [...prev.classes, classId],
     }))
+  }
+
+  const addCustomSubject = () => {
+    if (customSubject.trim() && !formData.subjects.includes(customSubject.trim())) {
+      setFormData((prev) => ({
+        ...prev,
+        subjects: [...prev.subjects, customSubject.trim()],
+      }))
+      setCustomSubject("")
+      setShowCustomSubjectInput(false)
+    }
+  }
+
+  const removeSubject = (subject: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: prev.subjects.filter((s) => s !== subject),
+    }))
+  }
+
+  const selectAllClasses = () => {
+    setFormData((prev) => ({
+      ...prev,
+      classes: classes.map((c) => c.id),
+    }))
+  }
+
+  const deselectAllClasses = () => {
+    setFormData((prev) => ({
+      ...prev,
+      classes: [],
+    }))
+  }
+
+  const selectAllSubjects = () => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: DEFAULT_SUBJECTS,
+    }))
+  }
+
+  const deselectAllSubjects = () => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: [],
+    }))
+  }
+
+  const addCustomClass = () => {
+    if (customClass.trim() && !customClasses.includes(customClass.trim())) {
+      setCustomClasses((prev) => [...prev, customClass.trim()])
+      setCustomClass("")
+      setShowCustomClassInput(false)
+    }
+  }
+
+  const removeCustomClass = (className: string) => {
+    setCustomClasses((prev) => prev.filter((c) => c !== className))
   }
 
   return (
@@ -297,34 +365,151 @@ export default function CreateExamPage() {
               </Card>
 
               <Card className="p-6 bg-card border-border mb-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4">
-                  Subjects *
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {SUBJECTS.map((subject) => (
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Subjects *
+                  </h2>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={selectAllSubjects}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={deselectAllSubjects}
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Selected Subjects Pills */}
+                {formData.subjects.length > 0 && (
+                  <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Selected ({formData.subjects.length}):
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {formData.subjects.map((subject) => (
+                        <span
+                          key={subject}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                        >
+                          {subject}
+                          <button
+                            type="button"
+                            onClick={() => removeSubject(subject)}
+                            className="hover:bg-primary/20 rounded-full p-0.5"
+                          >
+                            <X size={14} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Available Subjects Checkboxes */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                  {DEFAULT_SUBJECTS.map((subject) => (
                     <label
                       key={subject}
-                      className="flex items-center gap-2 cursor-pointer"
+                      className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition"
                     >
                       <input
                         type="checkbox"
                         checked={formData.subjects.includes(subject)}
                         onChange={() => toggleSubject(subject)}
-                        className="w-4 h-4"
+                        className="w-4 h-4 text-primary"
                       />
                       <span className="text-sm text-foreground">{subject}</span>
                     </label>
                   ))}
                 </div>
+
+                {/* Add Custom Subject */}
+                {!showCustomSubjectInput ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowCustomSubjectInput(true)}
+                    className="w-full"
+                  >
+                    <Plus size={16} className="mr-2" />
+                    Add Custom Subject
+                  </Button>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customSubject}
+                      onChange={(e) => setCustomSubject(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addCustomSubject())}
+                      placeholder="Enter subject name"
+                      className="flex-1 px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+                      autoFocus
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={addCustomSubject}
+                      disabled={!customSubject.trim()}
+                    >
+                      Add
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowCustomSubjectInput(false)
+                        setCustomSubject("")
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                )}
+
                 {errors.subjects && (
                   <p className="text-red-500 text-sm mt-2">{errors.subjects}</p>
                 )}
               </Card>
 
               <Card className="p-6 bg-card border-border mb-6">
-                <h2 className="text-xl font-semibold text-foreground mb-4">
-                  Classes *
-                </h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Classes *
+                  </h2>
+                  {classes.length > 0 && (
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={selectAllClasses}
+                      >
+                        Select All
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={deselectAllClasses}
+                      >
+                        Clear All
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 {classes.length === 0 ? (
                   <div className="text-center py-8 bg-muted/50 rounded-lg">
                     <p className="text-muted-foreground mb-4">
@@ -337,22 +522,134 @@ export default function CreateExamPage() {
                     </Link>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {classes.map((cls) => (
-                      <label
-                        key={cls.id}
-                        className="flex items-center gap-2 cursor-pointer"
+                  <>
+                    {/* Selected Classes Pills */}
+                    {formData.classes.length > 0 && (
+                      <div className="mb-4 p-3 bg-muted/50 rounded-lg">
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Selected ({formData.classes.length}):
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {formData.classes.map((classId) => {
+                            const cls = classes.find((c) => c.id === classId)
+                            return cls ? (
+                              <span
+                                key={classId}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                              >
+                                {cls.name}
+                                <button
+                                  type="button"
+                                  onClick={() => toggleClass(classId)}
+                                  className="hover:bg-primary/20 rounded-full p-0.5"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </span>
+                            ) : null
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Custom Classes Pills */}
+                    {customClasses.length > 0 && (
+                      <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Custom Classes ({customClasses.length}):
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {customClasses.map((className) => (
+                            <span
+                              key={className}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full text-sm"
+                            >
+                              {className}
+                              <button
+                                type="button"
+                                onClick={() => removeCustomClass(className)}
+                                className="hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full p-0.5"
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Available Classes Checkboxes */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                      {classes.map((cls) => (
+                        <label
+                          key={cls.id}
+                          className="flex items-center gap-2 cursor-pointer hover:bg-muted/50 p-2 rounded transition"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.classes.includes(cls.id)}
+                            onChange={() => toggleClass(cls.id)}
+                            className="w-4 h-4 text-primary"
+                          />
+                          <div className="flex flex-col">
+                            <span className="text-sm text-foreground font-medium">
+                              {cls.name}
+                            </span>
+                            {cls.form && (
+                              <span className="text-xs text-muted-foreground">
+                                {cls.form}
+                              </span>
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+
+                    {/* Add Custom Class */}
+                    {!showCustomClassInput ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowCustomClassInput(true)}
+                        className="w-full"
                       >
+                        <Plus size={16} className="mr-2" />
+                        Add Custom Class Name
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
                         <input
-                          type="checkbox"
-                          checked={formData.classes.includes(cls.id)}
-                          onChange={() => toggleClass(cls.id)}
-                          className="w-4 h-4"
+                          type="text"
+                          value={customClass}
+                          onChange={(e) => setCustomClass(e.target.value)}
+                          onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addCustomClass())}
+                          placeholder="Enter class name (e.g., Form 4A, Year 10)"
+                          className="flex-1 px-3 py-2 border border-border rounded-md bg-background text-foreground text-sm"
+                          autoFocus
                         />
-                        <span className="text-sm text-foreground">{cls.name}</span>
-                      </label>
-                    ))}
-                  </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={addCustomClass}
+                          disabled={!customClass.trim()}
+                        >
+                          Add
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setShowCustomClassInput(false)
+                            setCustomClass("")
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
                 {errors.classes && (
                   <p className="text-red-500 text-sm mt-2">{errors.classes}</p>

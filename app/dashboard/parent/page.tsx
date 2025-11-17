@@ -1,14 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
-import { BookOpen, TrendingUp, Calendar, Award } from "lucide-react"
+import { BookOpen, TrendingUp, Calendar, Award, DollarSign, Bell, FileText } from "lucide-react"
+import { Loader } from "@/components/ui/loader"
+import EnhancedStatCard from "@/components/dashboard/enhanced-stat-card"
+import DashboardGrid from "@/components/dashboard/dashboard-grid"
+import QuickActions from "@/components/dashboard/quick-actions"
+import ActivityTimeline, { generateSampleActivities } from "@/components/dashboard/activity-timeline"
+import { StatCardsGridSkeleton } from "@/components/loading/stat-card-skeleton"
 
 export default function ParentDashboard() {
+  const router = useRouter()
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [timelineActivities] = useState(generateSampleActivities())
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const userString = localStorage.getItem("user")
@@ -33,8 +43,9 @@ export default function ParentDashboard() {
       }
 
       setUserName(user.fullName || user.email.split("@")[0])
-    setUserId(user.id || user.email)
+      setUserId(user.id || user.email)
       setIsAuthenticated(true)
+      setLoading(false)
     } catch (error) {
       localStorage.removeItem("user")
       window.location.href = "/auth/login"
@@ -42,14 +53,7 @@ export default function ParentDashboard() {
   }, [])
 
   if (!isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Loading Dashboard...</h2>
-          <p className="text-muted-foreground">Please wait while we verify your credentials</p>
-        </div>
-      </div>
-    )
+    return <Loader size="lg" text="Loading Dashboard..." fullScreen />
   }
 
   return (
@@ -77,75 +81,81 @@ export default function ParentDashboard() {
             </div>
 
             {/* Performance Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Average Score</p>
-                    <p className="text-3xl font-bold text-foreground">84%</p>
-                  </div>
-                  <div className="bg-primary p-3 rounded-lg">
-                    <Award size={24} className="text-primary-foreground" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Attendance</p>
-                    <p className="text-3xl font-bold text-foreground">96%</p>
-                  </div>
-                  <div className="bg-secondary p-3 rounded-lg">
-                    <Calendar size={24} className="text-secondary-foreground" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Rank in Class</p>
-                    <p className="text-3xl font-bold text-foreground">8/35</p>
-                  </div>
-                  <div className="bg-accent p-3 rounded-lg">
-                    <TrendingUp size={24} className="text-accent-foreground" />
-                  </div>
-                </div>
-              </div>
-              <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Subjects</p>
-                    <p className="text-3xl font-bold text-foreground">8</p>
-                  </div>
-                  <div className="bg-chart-1 p-3 rounded-lg">
-                    <BookOpen size={24} className="text-white" />
-                  </div>
-                </div>
-              </div>
-            </div>
+            {loading ? (
+              <StatCardsGridSkeleton count={4} />
+            ) : (
+              <DashboardGrid columns={4} gap={6} className="mb-8">
+                <EnhancedStatCard
+                  title="Average Score"
+                  value={84}
+                  icon={<Award size={24} />}
+                  gradient="blue"
+                  suffix="%"
+                  trend={{ value: 5, isPositive: true }}
+                  onClick={() => router.push('/dashboard/parent/student-report')}
+                />
+                
+                <EnhancedStatCard
+                  title="Attendance"
+                  value={96}
+                  icon={<Calendar size={24} />}
+                  gradient="green"
+                  suffix="%"
+                  trend={{ value: 2, isPositive: true }}
+                />
+                
+                <EnhancedStatCard
+                  title="Class Rank"
+                  value="8/35"
+                  icon={<TrendingUp size={24} />}
+                  gradient="purple"
+                />
+                
+                <EnhancedStatCard
+                  title="Fee Status"
+                  value="Paid"
+                  icon={<DollarSign size={24} />}
+                  gradient="orange"
+                  onClick={() => router.push('/dashboard/parent/fee-status')}
+                />
+              </DashboardGrid>
+            )}
 
-            {/* Recent Updates */}
-            <div className="bg-card rounded-lg border border-border p-6 shadow-sm">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Latest Updates</h3>
-              <div className="space-y-4">
-                {[
-                  { title: "New assignment posted", subject: "Mathematics", date: "2 hours ago" },
-                  { title: "Attendance marked present", subject: "All Classes", date: "1 day ago" },
-                  { title: "New grades posted", subject: "English", date: "2 days ago" },
-                  { title: "School announcement", subject: "Holiday notice", date: "3 days ago" },
-                ].map((update, index) => (
-                  <div key={index} className="flex items-start gap-4 pb-4 border-b border-border last:border-0">
-                    <div className="w-3 h-3 mt-2 rounded-full bg-primary flex-shrink-0" />
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">{update.title}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {update.subject} · {update.date}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Quick Actions */}
+            <QuickActions
+              title="Quick Actions"
+              columns={3}
+              className="mb-8"
+              actions={[
+                {
+                  label: "Child's Progress",
+                  icon: <TrendingUp size={20} />,
+                  onClick: () => router.push('/dashboard/parent/student-report'),
+                  color: 'primary'
+                },
+                {
+                  label: "Fee Status",
+                  icon: <DollarSign size={20} />,
+                  onClick: () => router.push('/dashboard/parent/fee-status'),
+                  color: 'success'
+                },
+                {
+                  label: "Announcements",
+                  icon: <Bell size={20} />,
+                  onClick: () => router.push('/dashboard/parent/announcements'),
+                  color: 'info'
+                }
+              ]}
+            />
+
+            {/* Activity Timeline */}
+            <ActivityTimeline
+              activities={timelineActivities}
+              maxItems={5}
+              loading={loading}
+              showViewAll={true}
+              onViewAll={() => router.push('/dashboard/parent/activities')}
+            />
           </div>
         </main>
       </div>

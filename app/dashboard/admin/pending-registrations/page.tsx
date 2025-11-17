@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { UserCheck, UserX, Clock, Mail, Phone, Users } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { UserCheck, UserX, Clock, Mail, Phone, Users, Eye } from "lucide-react"
 
 interface PendingUser {
   id: string
@@ -15,6 +16,7 @@ interface PendingUser {
 }
 
 export default function PendingRegistrationsPage() {
+  const router = useRouter()
   const [users, setUsers] = useState<PendingUser[]>([])
   const [loading, setLoading] = useState(true)
   const [processing, setProcessing] = useState<string | null>(null)
@@ -23,18 +25,35 @@ export default function PendingRegistrationsPage() {
     fetchPendingUsers()
   }, [])
 
+  const handleViewProfile = (userId: string) => {
+    // Navigate to the pending user profile page
+    router.push(`/dashboard/admin/pending-users/${userId}`)
+  }
+
   const fetchPendingUsers = async () => {
     try {
+      console.log('[Pending Page] Fetching pending users...')
       setLoading(true)
       const response = await fetch("/api/admin/pending-users")
+      console.log('[Pending Page] Response status:', response.status)
+      console.log('[Pending Page] Response ok:', response.ok)
+      
       if (response.ok) {
         const data = await response.json()
-        setUsers(data.users)
+        console.log('[Pending Page] Received data:', data)
+        console.log('[Pending Page] Users array:', data.users)
+        console.log('[Pending Page] Users count:', data.users?.length)
+        setUsers(data.users || [])
+      } else {
+        console.error('[Pending Page] Response not ok:', response.status)
+        const errorData = await response.json()
+        console.error('[Pending Page] Error data:', errorData)
       }
     } catch (error) {
-      console.error("Error fetching pending users:", error)
+      console.error("[Pending Page] Error fetching pending users:", error)
     } finally {
       setLoading(false)
+      console.log('[Pending Page] Loading complete')
     }
   }
 
@@ -158,12 +177,19 @@ export default function PendingRegistrationsPage() {
             {users.map((user) => (
               <div key={user.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start justify-between">
-                  <div className="flex-1">
+                  {/* Clickable user info section */}
+                  <div 
+                    className="flex-1 cursor-pointer group"
+                    onClick={() => handleViewProfile(user.id)}
+                  >
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900">{user.fullName}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                        {user.fullName}
+                      </h3>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
                         {user.role}
                       </span>
+                      <Eye size={16} className="text-gray-400 group-hover:text-primary transition-colors" />
                     </div>
                     
                     <div className="space-y-1 text-sm text-gray-600">
@@ -184,9 +210,13 @@ export default function PendingRegistrationsPage() {
                     </div>
                   </div>
 
+                  {/* Action buttons */}
                   <div className="flex items-center gap-3 ml-4">
                     <button
-                      onClick={() => handleApprove(user.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleApprove(user.id)
+                      }}
                       disabled={processing === user.id}
                       className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -194,7 +224,10 @@ export default function PendingRegistrationsPage() {
                       {processing === user.id ? "Processing..." : "Approve"}
                     </button>
                     <button
-                      onClick={() => handleReject(user.id)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleReject(user.id)
+                      }}
                       disabled={processing === user.id}
                       className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >

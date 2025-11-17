@@ -655,3 +655,25 @@
 .focus-ring-inset {
   @apply focus:ring-2 focus:ring-inset focus:ring-primary/50 focus:outline-none transition-all duration-150;
 }
+
+/* Print styles for receipts and documents */
+@media print {
+  /* Ensure watermark and background graphics print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Page breaks */
+  .page-break-before {
+    page-break-before: always;
+  }
+  
+  .page-break-after {
+    page-break-after: always;
+  }
+  
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+}

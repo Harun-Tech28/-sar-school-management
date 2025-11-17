@@ -102,6 +102,11 @@ export function Sidebar({ userRole }: SidebarProps) {
               href: `/dashboard/${userRole}/teachers`,
               icon: Users,
             },
+            {
+              label: "Pending Registrations",
+              href: `/dashboard/${userRole}/pending-registrations`,
+              icon: ClipboardCheck,
+            },
           ]
         },
         {

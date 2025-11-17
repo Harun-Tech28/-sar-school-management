@@ -1,17 +1,25 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Header } from "@/components/layout/header"
-import { Users, BookOpen, Calendar, TrendingUp } from "lucide-react"
-import { GhanaSchoolMetrics } from "@/components/ghana-school-metrics"
+import { Users, BookOpen, Calendar, TrendingUp, UserPlus, Bell, BarChart3, DollarSign, Settings, GraduationCap, UserCheck, AlertTriangle, FileText, School } from "lucide-react"
 import { AnimatedNumber } from "@/components/ui/animated-number"
 import { Loader } from "@/components/ui/loader"
-import { ActivityFeed } from "@/components/notifications/activity-feed"
+import { ActivityFeed as NotificationActivityFeed } from "@/components/notifications/activity-feed"
+import { ActivityFeed } from "@/components/ui/activity-feed"
 import { NotificationBell } from "@/components/notifications/notification-bell"
+import { EnhancedCard } from "@/components/ui/enhanced-card"
+import { ProgressBar } from "@/components/ui/progress-bar"
+import EnhancedStatCard from "@/components/dashboard/enhanced-stat-card"
+import DashboardGrid from "@/components/dashboard/dashboard-grid"
+import QuickActions from "@/components/dashboard/quick-actions"
+import ActivityTimeline, { generateSampleActivities } from "@/components/dashboard/activity-timeline"
+import { StatCardsGridSkeleton } from "@/components/loading/stat-card-skeleton"
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -26,6 +34,11 @@ export default function AdminDashboard() {
     performanceAverage: 0,
     recentReports: 0
   })
+  const [pendingCount, setPendingCount] = useState(0)
+  const [pendingUsers, setPendingUsers] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
+  const [timelineActivities] = useState(generateSampleActivities())
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const userString = localStorage.getItem("user")
@@ -57,6 +70,7 @@ export default function AdminDashboard() {
       setUserName(user.fullName || user.email.split("@")[0])
       setUserId(user.id || user.email)
       setIsAuthenticated(true)
+      setLoading(false)
       
       // Fetch real counts from database
       fetch("/api/dashboard/stats")
@@ -92,12 +106,68 @@ export default function AdminDashboard() {
           console.error("Error fetching analytics:", error)
           setAnalytics({ financialNet: 0, performanceAverage: 0, recentReports: 0 })
         })
+
+      // Fetch pending registrations
+      fetch("/api/admin/pending-users")
+        .then(response => response.json())
+        .then(data => {
+          if (data.success || data.users) {
+            const users = data.users || []
+            setPendingCount(users.length)
+            setPendingUsers(users.slice(0, 3)) // Get first 3 for preview
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching pending users:", error)
+          setPendingCount(0)
+          setPendingUsers([])
+        })
+
+      // Set sample activities
+      setActivities([
+        {
+          id: '1',
+          title: 'New Student Registered',
+          description: 'John Doe has registered for Grade 10',
+          time: '2 hours ago',
+          icon: UserPlus,
+          color: 'green' as const,
+          onClick: () => router.push('/dashboard/admin/students')
+        },
+        {
+          id: '2',
+          title: 'Fee Payment Received',
+          description: 'Payment of GH₵ 500 from Sarah Wilson',
+          time: '4 hours ago',
+          icon: DollarSign,
+          color: 'blue' as const,
+          onClick: () => router.push('/dashboard/admin/finance')
+        },
+        {
+          id: '3',
+          title: 'New Announcement Posted',
+          description: 'Mid-term exam schedule published',
+          time: '6 hours ago',
+          icon: Bell,
+          color: 'purple' as const,
+          onClick: () => router.push('/dashboard/admin/announcements')
+        },
+        {
+          id: '4',
+          title: 'Teacher Report Submitted',
+          description: 'Monthly performance report by Mr. Smith',
+          time: '1 day ago',
+          icon: FileText,
+          color: 'orange' as const,
+          onClick: () => router.push('/dashboard/admin/reports')
+        },
+      ])
     } catch (error) {
       console.log("[v0] Error parsing user data:", error)
       localStorage.removeItem("user")
       window.location.href = "/auth/login"
     }
-  }, [])
+  }, [router])
 
   // Show loading state while authenticating
   if (!isAuthenticated) {
@@ -197,41 +267,128 @@ export default function AdminDashboard() {
               <p className="text-white/90 text-lg">Here's what's happening in your school today ✨</p>
             </div>
 
-            {/* Stats Grid with Visual Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {statCards.map((stat, index) => {
-                return stat.href ? (
-                  <Link key={index} href={stat.href} className="block">
-                    <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100 cursor-pointer">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-gray-500 text-xs font-semibold tracking-wide">{stat.label}</p>
+            {/* Enhanced Stats Cards */}
+            {loading ? (
+              <StatCardsGridSkeleton count={4} />
+            ) : (
+              <DashboardGrid columns={4} gap={6} className="mb-8">
+                <EnhancedStatCard
+                  title="Total Students"
+                  value={counts.students}
+                  icon={<GraduationCap size={24} />}
+                  gradient="blue"
+                  trend={{ value: 12, isPositive: true }}
+                  onClick={() => router.push('/dashboard/admin/students')}
+                />
+                
+                <EnhancedStatCard
+                  title="Total Teachers"
+                  value={counts.teachers}
+                  icon={<Users size={24} />}
+                  gradient="green"
+                  trend={{ value: 5, isPositive: true }}
+                  onClick={() => router.push('/dashboard/admin/teachers')}
+                />
+                
+                <EnhancedStatCard
+                  title="Total Parents"
+                  value={counts.parents}
+                  icon={<UserCheck size={24} />}
+                  gradient="purple"
+                  trend={{ value: 8, isPositive: true }}
+                  onClick={() => router.push('/dashboard/admin/parents')}
+                />
+                
+                <EnhancedStatCard
+                  title="Pending Registrations"
+                  value={pendingCount}
+                  icon={<AlertTriangle size={24} />}
+                  gradient="orange"
+                  onClick={() => router.push('/dashboard/admin/pending-registrations')}
+                />
+              </DashboardGrid>
+            )}
+
+            {/* Quick Actions */}
+            <QuickActions
+              title="Quick Actions"
+              columns={4}
+              className="mb-8"
+              actions={[
+                {
+                  label: "Add Student",
+                  icon: <UserPlus size={20} />,
+                  onClick: () => router.push('/dashboard/admin/students/add'),
+                  color: 'primary'
+                },
+                {
+                  label: "Add Teacher",
+                  icon: <GraduationCap size={20} />,
+                  onClick: () => router.push('/dashboard/admin/teachers/add'),
+                  color: 'success'
+                },
+                {
+                  label: "Create Class",
+                  icon: <School size={20} />,
+                  onClick: () => router.push('/dashboard/admin/classes/add'),
+                  color: 'info'
+                },
+                {
+                  label: "View Reports",
+                  icon: <BarChart3 size={20} />,
+                  onClick: () => router.push('/dashboard/admin/reports'),
+                  color: 'secondary'
+                }
+              ]}
+            />
+
+            {/* Pending Registrations Alert */}
+            {pendingCount > 0 && (
+              <Link href="/dashboard/admin/pending-registrations">
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all mb-8 cursor-pointer group">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl group-hover:scale-110 transition-transform">
+                        <span className="text-4xl">⏳</span>
                       </div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-5xl font-bold text-gray-800">
-                          <AnimatedNumber value={stat.value} duration={1500} />
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-1">
+                          {pendingCount} Pending Registration{pendingCount !== 1 ? 's' : ''}
                         </h3>
-                        <div className={`${stat.bgColor} w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg`}>
-                          {stat.icon}
-                        </div>
-                      </div>
-                      {/* Visual Representation - Proportion of Total */}
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs text-gray-600">
-                          <span>Of Total ({total})</span>
-                          <span className="font-semibold">{stat.percentage.toFixed(1)}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div 
-                            className={`${stat.progressColor} h-2 rounded-full transition-all duration-500 ease-out`}
-                            style={{ width: `${stat.percentage}%` }}
-                          ></div>
-                        </div>
+                        <p className="text-white/90">
+                          {pendingCount === 1 ? 'A new user is' : 'New users are'} waiting for your approval
+                        </p>
                       </div>
                     </div>
-                  </Link>
-                ) : null
-              })}
-            </div>
+                    <div className="hidden md:flex items-center gap-2 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl group-hover:bg-white/30 transition-all">
+                      <span className="text-white font-semibold">Review Now</span>
+                      <svg className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                  
+                  {/* Preview of pending users */}
+                  {pendingUsers.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-white/20">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        {pendingUsers.map((user, index) => (
+                          <div key={user.id} className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2">
+                            <span className="text-white/90 text-sm font-medium">{user.fullName}</span>
+                            <span className="text-white/70 text-xs">({user.role})</span>
+                          </div>
+                        ))}
+                        {pendingCount > 3 && (
+                          <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
+                            <span className="text-white/90 text-sm font-medium">+{pendingCount - 3} more</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Link>
+            )}
 
             {/* Overview Chart */}
             <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100 mb-8">
@@ -322,18 +479,75 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Quick Actions */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {quickActions.map((action, index) => (
-                  <Link key={index} href={action.href}>
-                    <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100 text-center group cursor-pointer">
-                      <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{action.icon}</div>
-                      <p className="text-gray-800 font-semibold">{action.label}</p>
+            {/* Dashboard Grid with Overview and Activity Feed */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+              {/* Overview Stats - 2 columns */}
+              <div className="lg:col-span-2">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Overview</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <EnhancedCard className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900">Active Classes</h3>
+                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-5 h-5 text-blue-600" />
+                      </div>
                     </div>
-                  </Link>
-                ))}
+                    <AnimatedNumber value={counts.classes} className="text-3xl font-bold text-gray-900" />
+                    <p className="text-sm text-gray-600 mt-2">Currently running</p>
+                    <ProgressBar value={75} className="mt-3" color="blue" />
+                  </EnhancedCard>
+
+                  <EnhancedCard className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900">Student-Teacher Ratio</h3>
+                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <Users className="w-5 h-5 text-green-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900">
+                      {counts.teachers > 0 ? Math.round(counts.students / counts.teachers) : 0}:1
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">Students per teacher</p>
+                    <ProgressBar value={60} className="mt-3" color="green" />
+                  </EnhancedCard>
+
+                  <EnhancedCard className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900">Financial Net</h3>
+                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <DollarSign className="w-5 h-5 text-yellow-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">
+                      GH₵ <AnimatedNumber value={analytics.financialNet} />
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">This month</p>
+                    <ProgressBar value={85} className="mt-3" color="yellow" />
+                  </EnhancedCard>
+
+                  <EnhancedCard className="p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-gray-900">Performance Average</h3>
+                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-purple-600" />
+                      </div>
+                    </div>
+                    <div className="text-3xl font-bold text-purple-600">
+                      {analytics.performanceAverage > 0 ? `${analytics.performanceAverage.toFixed(1)}%` : '0%'}
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2">School-wide average</p>
+                    <ProgressBar value={analytics.performanceAverage} className="mt-3" color="purple" />
+                  </EnhancedCard>
+                </div>
+              </div>
+
+              {/* Activity Feed - 1 column */}
+              <div>
+                <ActivityFeed
+                  activities={activities}
+                  title="Recent Activities"
+                  emptyMessage="No recent activities to show"
+                />
               </div>
             </div>
 
@@ -412,8 +626,19 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Recent Activity */}
-            <ActivityFeed userRole="admin" maxItems={10} />
+            {/* Activity Timeline */}
+            <div className="mb-8">
+              <ActivityTimeline
+                activities={timelineActivities}
+                maxItems={5}
+                loading={loading}
+                showViewAll={true}
+                onViewAll={() => router.push('/dashboard/admin/activities')}
+              />
+            </div>
+
+            {/* System Activity Log */}
+            <NotificationActivityFeed userRole="admin" maxItems={10} />
           </div>
         </main>
       </div>

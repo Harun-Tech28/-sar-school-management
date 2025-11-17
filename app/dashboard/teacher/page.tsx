@@ -1,21 +1,29 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Sidebar } from "@/components/layout/sidebar"
-import { Header } from "@/components/layout/header"
-import { Users, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import { Users, Clock, CheckCircle, AlertCircle, BookOpen, ClipboardCheck, FileText, Bell } from "lucide-react"
 import { AnimatedNumber } from "@/components/ui/animated-number"
 import { Loader } from "@/components/ui/loader"
 import { ActivityFeed } from "@/components/notifications/activity-feed"
 import { NotificationBell } from "@/components/notifications/notification-bell"
+import EnhancedStatCard from "@/components/dashboard/enhanced-stat-card"
+import DashboardGrid from "@/components/dashboard/dashboard-grid"
+import QuickActions from "@/components/dashboard/quick-actions"
+import ActivityTimeline, { generateSampleActivities } from "@/components/dashboard/activity-timeline"
+import { StatCardsGridSkeleton } from "@/components/loading/stat-card-skeleton"
 
 export default function TeacherDashboard() {
+  const router = useRouter()
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [totalStudents, setTotalStudents] = useState(0)
   const [totalClasses, setTotalClasses] = useState(0)
+  const [timelineActivities] = useState(generateSampleActivities())
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const userString = localStorage.getItem("user")
@@ -42,6 +50,7 @@ export default function TeacherDashboard() {
       setUserName(user.fullName || user.email.split("@")[0])
       setUserId(user.id || user.email)
       setIsAuthenticated(true)
+      setLoading(false)
       
       // Fetch real counts from database
       fetch("/api/dashboard/stats")
@@ -137,61 +146,75 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Stats Grid with Visual Indicators */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {statCards.map((stat, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-gray-500 text-xs font-semibold tracking-wide">{stat.label}</p>
-                    <span className={`text-xs font-bold flex items-center gap-1 ${stat.trendUp ? 'text-green-600' : 'text-gray-500'}`}>
-                      {stat.trendUp ? '↗' : '→'} {stat.trend}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-5xl font-bold text-gray-800">
-                      {stat.value.includes('%') ? (
-                        <><AnimatedNumber value={parseInt(stat.value)} duration={1500} />%</>
-                      ) : (
-                        <AnimatedNumber value={parseInt(stat.value)} duration={1500} />
-                      )}
-                    </h3>
-                    <div className={`${stat.bgColor} w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg`}>
-                      {stat.icon}
-                    </div>
-                  </div>
-                  {/* Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-gray-600">
-                      <span>Progress</span>
-                      <span className="font-semibold">{stat.percentage.toFixed(0)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                      <div 
-                        className={`${stat.progressColor} h-2 rounded-full transition-all duration-500 ease-out`}
-                        style={{ width: `${stat.percentage}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <StatCardsGridSkeleton count={4} />
+            ) : (
+              <DashboardGrid columns={4} gap={6} className="mb-8">
+                <EnhancedStatCard
+                  title="My Students"
+                  value={totalStudents}
+                  icon={<Users size={24} />}
+                  gradient="blue"
+                  trend={{ value: 5, isPositive: true }}
+                />
+                
+                <EnhancedStatCard
+                  title="My Classes"
+                  value={totalClasses}
+                  icon={<BookOpen size={24} />}
+                  gradient="green"
+                  trend={{ value: 2, isPositive: true }}
+                />
+                
+                <EnhancedStatCard
+                  title="Attendance Rate"
+                  value="0"
+                  icon={<CheckCircle size={24} />}
+                  gradient="purple"
+                  suffix="%"
+                />
+                
+                <EnhancedStatCard
+                  title="Pending Tasks"
+                  value={0}
+                  icon={<Clock size={24} />}
+                  gradient="orange"
+                />
+              </DashboardGrid>
+            )}
 
             {/* Quick Actions */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {quickActions.map((action, index) => (
-                  <Link key={index} href={action.href}>
-                    <div className="bg-white rounded-2xl p-8 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100 text-center group cursor-pointer">
-                      <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">{action.icon}</div>
-                      <p className="text-gray-800 font-semibold">{action.label}</p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
+            <QuickActions
+              title="Quick Actions"
+              columns={4}
+              className="mb-8"
+              actions={[
+                {
+                  label: "Take Attendance",
+                  icon: <ClipboardCheck size={20} />,
+                  onClick: () => router.push('/dashboard/teacher/attendance'),
+                  color: 'primary'
+                },
+                {
+                  label: "Grade Students",
+                  icon: <FileText size={20} />,
+                  onClick: () => router.push('/dashboard/teacher/grades'),
+                  color: 'success'
+                },
+                {
+                  label: "Create Homework",
+                  icon: <BookOpen size={20} />,
+                  onClick: () => router.push('/dashboard/teacher/homework'),
+                  color: 'info'
+                },
+                {
+                  label: "Announcements",
+                  icon: <Bell size={20} />,
+                  onClick: () => router.push('/dashboard/teacher/announcements'),
+                  color: 'warning'
+                }
+              ]}
+            />
 
             {/* Analytics & Reports */}
             <div className="mb-8">
@@ -268,6 +291,17 @@ export default function TeacherDashboard() {
                   <p className="text-gray-500 text-sm">Classes will appear here once they are created</p>
                 </div>
               )}
+            </div>
+
+            {/* Activity Timeline */}
+            <div className="mb-8">
+              <ActivityTimeline
+                activities={timelineActivities}
+                maxItems={5}
+                loading={loading}
+                showViewAll={true}
+                onViewAll={() => router.push('/dashboard/teacher/activities')}
+              />
             </div>
 
             {/* Recent Activity */}

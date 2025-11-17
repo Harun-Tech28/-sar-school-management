@@ -18,9 +18,9 @@ export const DEFAULT_SCHOOL_BRANDING: SchoolBranding = {
   phone: '+233 24 000 0000',
   email: 'info@sar.edu',
   website: 'www.sar.edu',
-  // Default transparent logo (Base64 encoded PNG)
-  // This is a placeholder - replace with actual school logo
-  logoTransparent: '/logo-transparent.png',
+  // School logo - will be used as transparent watermark on all printed documents
+  logo: '/school-logo.png',
+  logoTransparent: '/school-logo.png',
 }
 
 /**

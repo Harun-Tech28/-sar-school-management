@@ -6,12 +6,13 @@ import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, DollarSign, Download, Loader2, Search } from "lucide-react"
+import { Plus, DollarSign, Download, Loader2, Search, Printer } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { toast } from "sonner"
 import { ExportButton } from "@/components/ui/export-button"
 import { exportToExcel, exportToCSV } from "@/lib/export-utils"
+import { FeeReceipt } from "@/components/receipts/fee-receipt"
 
 interface FeePayment {
   id: string
@@ -38,6 +39,7 @@ export default function FeeManagementPage() {
   const [payments, setPayments] = useState<FeePayment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
+  const [selectedPayment, setSelectedPayment] = useState<FeePayment | null>(null)
   const [stats, setStats] = useState({
     totalCollected: 0,
     totalStudents: 0,
@@ -217,6 +219,7 @@ export default function FeeManagementPage() {
                       <TableHead>Payment Method</TableHead>
                       <TableHead>Term</TableHead>
                       <TableHead>Payment Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -236,6 +239,17 @@ export default function FeeManagementPage() {
                         <TableCell>{payment.term}</TableCell>
                         <TableCell>
                           {new Date(payment.paymentDate).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedPayment(payment)}
+                            className="gap-2"
+                          >
+                            <Printer size={16} />
+                            Print Receipt
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -272,6 +286,11 @@ export default function FeeManagementPage() {
           </div>
         </main>
       </div>
+
+      {/* Receipt Modal */}
+      {selectedPayment && (
+        <FeeReceipt payment={selectedPayment} onClose={() => setSelectedPayment(null)} />
+      )}
     </div>
   )
 }

@@ -6,7 +6,7 @@ interface ProgressBarProps {
   showLabel?: boolean
   label?: string
   showPercentage?: boolean
-  color?: "red" | "yellow" | "gradient" | "green" | "blue"
+  color?: "red" | "yellow" | "gradient" | "green" | "blue" | "purple" | "orange"
   variant?: "linear" | "circular"
   size?: "sm" | "md" | "lg"
   animated?: boolean
@@ -34,6 +34,8 @@ export function ProgressBar({
     yellow: "bg-[#FFD100]",
     green: "bg-green-500",
     blue: "bg-blue-500",
+    purple: "bg-purple-500",
+    orange: "bg-orange-500",
     gradient: "bg-gradient-to-r from-[#E31E24] to-[#FFD100]",
   }
 

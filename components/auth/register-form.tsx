@@ -148,7 +148,7 @@ export function RegisterForm() {
 
       <div>
         <label htmlFor="role" className="block text-sm font-medium text-gray-900 mb-2">
-          Role
+          I am registering as a <span className="text-red-600">*</span>
         </label>
         <select
           id="role"
@@ -159,8 +159,11 @@ export function RegisterForm() {
           <option value="student">Student</option>
           <option value="parent">Parent</option>
           <option value="teacher">Teacher</option>
-          <option value="admin">Admin</option>
         </select>
+        <p className="mt-2 text-xs text-gray-600 flex items-start gap-1">
+          <AlertCircle size={12} className="mt-0.5 flex-shrink-0" />
+          <span>Your account will require admin approval before you can login.</span>
+        </p>
       </div>
 
       <div>
