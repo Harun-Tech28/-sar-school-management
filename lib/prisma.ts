@@ -11,7 +11,7 @@ if (!process.env.DATABASE_URL && !isBuildTime) {
   throw new Error('DATABASE_URL environment variable is not set')
 }
 
-// Create Prisma client with production-ready settings
+// Create Prisma client with optimized production settings
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: {
@@ -19,6 +19,16 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
       url: process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
     }
   },
+  // Optimize connection pooling for faster queries
+  datasourceUrl: process.env.DATABASE_URL,
+  // Add connection pool settings
+  __internal: {
+    engine: {
+      connection_limit: 10, // Limit concurrent connections
+      pool_timeout: 10, // Timeout for getting connection from pool (seconds)
+      connect_timeout: 5, // Timeout for establishing connection (seconds)
+    }
+  }
 })
 
 if (process.env.NODE_ENV !== 'production') {

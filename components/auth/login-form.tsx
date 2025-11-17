@@ -11,6 +11,7 @@ import { Eye, EyeOff } from "lucide-react"
 export function LoginForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [loadingProgress, setLoadingProgress] = useState(0)
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [successMessage, setSuccessMessage] = useState("")
@@ -32,15 +33,26 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    setLoadingProgress(0)
     setError("")
+
+    // Simulate progress for better UX
+    const progressInterval = setInterval(() => {
+      setLoadingProgress(prev => {
+        if (prev >= 90) return prev
+        return prev + 10
+      })
+    }, 200)
 
     try {
       console.log("Attempting login with:", formData.email)
+      setLoadingProgress(20)
       
-      // Use simple login endpoint with timeout
+      // Use simple login endpoint with optimized timeout
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 12000) // 12 second timeout
       
+      setLoadingProgress(40)
       const response = await fetch("/api/auth/simple-login", {
         method: "POST",
         headers: {
@@ -54,45 +66,55 @@ export function LoginForm() {
       })
 
       clearTimeout(timeoutId)
+      clearInterval(progressInterval)
+      setLoadingProgress(70)
+      
       const data = await response.json()
       console.log("Login response:", data)
 
       if (!response.ok) {
         // Handle specific error codes
         if (data.code === "TIMEOUT") {
-          setError("Login timeout. Please check your internet connection and try again.")
+          setError("Login timeout. The server is taking too long to respond. Please try again.")
         } else if (data.code === "DB_CONNECTION_ERROR") {
-          setError("Database connection error. Please contact support if this persists.")
+          setError("Database connection error. Please try again in a moment.")
         } else {
           setError(data.error || "Invalid email or password")
         }
         setIsLoading(false)
+        setLoadingProgress(0)
         return
       }
 
       if (data.success && data.user) {
+        setLoadingProgress(90)
         const userRole = data.user.role.toLowerCase()
         console.log("Login successful! Redirecting to:", `/dashboard/${userRole}`)
         
         // Store user data in localStorage as backup
         localStorage.setItem("user", JSON.stringify(data.user))
         
+        setLoadingProgress(100)
+        
         // Use router.push for proper Next.js navigation
         router.push(`/dashboard/${userRole}`)
       } else {
         setError("Login failed. Please try again.")
         setIsLoading(false)
+        setLoadingProgress(0)
       }
     } catch (error) {
+      clearInterval(progressInterval)
       console.error("Login error:", error)
       
       // Handle network errors
       if (error instanceof Error && error.name === 'AbortError') {
-        setError("Request timeout. Please check your connection and try again.")
+        setError("Request timeout. The server is taking too long. Please check your connection and try again.")
       } else {
         setError("Network error. Please check your internet connection.")
       }
       setIsLoading(false)
+      setLoadingProgress(0)
     }
   }
 
@@ -162,10 +184,27 @@ export function LoginForm() {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50"
+        className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50 relative overflow-hidden"
       >
-        {isLoading ? "Signing in..." : "Sign In"}
+        {isLoading && (
+          <div 
+            className="absolute left-0 top-0 h-full bg-red-800 transition-all duration-300 ease-out"
+            style={{ width: `${loadingProgress}%` }}
+          />
+        )}
+        <span className="relative z-10">
+          {isLoading ? "Signing in..." : "Sign In"}
+        </span>
       </Button>
+      
+      {isLoading && (
+        <div className="text-center text-sm text-gray-600">
+          <div className="flex items-center justify-center gap-2">
+            <div className="animate-spin h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full" />
+            <span>Authenticating your credentials...</span>
+          </div>
+        </div>
+      )}
     </form>
   )
 }

@@ -3,21 +3,24 @@ import { prisma } from "@/lib/prisma"
 import { compare } from "bcryptjs"
 import { SignJWT } from "jose"
 
-// Helper function to handle login with timeout
-async function handleLoginWithTimeout(email: string, password: string, timeoutMs = 10000) {
+// Optimized helper function to handle login with timeout
+async function handleLoginWithTimeout(email: string, password: string, timeoutMs = 8000) {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new Error('Login request timeout')), timeoutMs)
   })
 
   const loginPromise = async () => {
-    // Find user (Prisma handles connection automatically)
+    // Optimized query - only fetch essential fields
     const user = await prisma.user.findUnique({
       where: { email },
-      include: {
-        student: true,
-        teacher: true,
-        parent: true,
-        admin: true,
+      select: {
+        id: true,
+        email: true,
+        password: true,
+        fullName: true,
+        role: true,
+        accountStatus: true,
+        rejectionReason: true,
       },
     })
 
@@ -25,14 +28,7 @@ async function handleLoginWithTimeout(email: string, password: string, timeoutMs
       throw new Error('INVALID_CREDENTIALS')
     }
 
-    // Verify password
-    const isValid = await compare(password, user.password)
-
-    if (!isValid) {
-      throw new Error('INVALID_CREDENTIALS')
-    }
-
-    // Check account status
+    // Check account status early (before password verification)
     if (user.accountStatus === 'PENDING') {
       throw new Error('ACCOUNT_PENDING')
     }
@@ -40,6 +36,13 @@ async function handleLoginWithTimeout(email: string, password: string, timeoutMs
     if (user.accountStatus === 'REJECTED') {
       const reason = user.rejectionReason || 'No reason provided'
       throw new Error(`ACCOUNT_REJECTED:${reason}`)
+    }
+
+    // Verify password
+    const isValid = await compare(password, user.password)
+
+    if (!isValid) {
+      throw new Error('INVALID_CREDENTIALS')
     }
 
     return user
