@@ -5,7 +5,7 @@ import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard, Loader2 } from "lucide-react"
+import { DollarSign, TrendingUp, TrendingDown, Wallet, CreditCard, Loader2, RefreshCw } from "lucide-react"
 import Link from "next/link"
 
 interface FinancialData {
@@ -22,6 +22,7 @@ export default function FinancialReportPage() {
   const [userId, setUserId] = useState("")
   const [financialData, setFinancialData] = useState<FinancialData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}")
@@ -32,8 +33,15 @@ export default function FinancialReportPage() {
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
     
-    // Fetch financial data
+    // Fetch financial data immediately
     fetchFinancialData()
+    
+    // Auto-refresh every 30 seconds to keep data current
+    const refreshInterval = setInterval(() => {
+      fetchFinancialData()
+    }, 30000) // 30 seconds
+    
+    return () => clearInterval(refreshInterval)
   }, [])
 
   const fetchFinancialData = async () => {
@@ -72,6 +80,7 @@ export default function FinancialReportPage() {
         monthlyExpenses: 0, // Can be calculated from monthly expenses
         recentPayments: incomeData.data?.slice(0, 5) || []
       })
+      setLastUpdated(new Date())
     } catch (error) {
       console.error('Error fetching financial data:', error)
       setFinancialData({
@@ -82,9 +91,15 @@ export default function FinancialReportPage() {
         monthlyExpenses: 0,
         recentPayments: []
       })
+      setLastUpdated(new Date())
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleManualRefresh = () => {
+    setIsLoading(true)
+    fetchFinancialData()
   }
 
   const formatCurrency = (amount: number) => {
@@ -110,10 +125,38 @@ export default function FinancialReportPage() {
               >
                 ← Back to Reports
               </Link>
-              <h1 className="text-3xl font-bold text-foreground">Financial Reports</h1>
-              <p className="text-muted-foreground mt-1">
-                Income, expenditure, and financial analysis
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-foreground">Financial Reports</h1>
+                  <p className="text-muted-foreground mt-1">
+                    Income, expenditure, and financial analysis
+                    {lastUpdated && (
+                      <span className="ml-2 text-xs text-green-600">
+                        • Updated {lastUpdated.toLocaleTimeString()}
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleManualRefresh}
+                  disabled={isLoading}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh Data
+                </Button>
+              </div>
+            </div>
+
+            {/* Auto-Update Info Banner */}
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-2 text-blue-800">
+                <RefreshCw className="h-4 w-4" />
+                <p className="text-sm font-medium">
+                  This report automatically updates every 30 seconds and reflects all income, expenses, and fee payments in real-time.
+                </p>
+              </div>
             </div>
 
             {/* Loading State */}
