@@ -12,6 +12,8 @@ if (!process.env.DATABASE_URL && !isBuildTime) {
 }
 
 // Create Prisma client with optimized production settings
+// Note: Connection pooling is configured via DATABASE_URL connection string parameters
+// Example: postgresql://user:pass@host:5432/db?connection_limit=10&pool_timeout=10
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
   log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   datasources: {
@@ -19,16 +21,6 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient({
       url: process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder'
     }
   },
-  // Optimize connection pooling for faster queries
-  datasourceUrl: process.env.DATABASE_URL,
-  // Add connection pool settings
-  __internal: {
-    engine: {
-      connection_limit: 10, // Limit concurrent connections
-      pool_timeout: 10, // Timeout for getting connection from pool (seconds)
-      connect_timeout: 5, // Timeout for establishing connection (seconds)
-    }
-  }
 })
 
 if (process.env.NODE_ENV !== 'production') {
