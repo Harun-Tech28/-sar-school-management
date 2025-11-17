@@ -1,12 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Trash2, Search, Loader2, Shield, User, Users, GraduationCap } from "lucide-react"
+import { Trash2, Search, Loader2, Shield, User, Users, GraduationCap, ExternalLink } from "lucide-react"
 import { toast } from "sonner"
 
 interface User {
@@ -16,9 +17,11 @@ interface User {
   role: string
   createdAt: string
   lastLogin?: string
+  profileId?: string // For navigating to specific profile pages
 }
 
 export default function UsersManagementPage() {
+  const router = useRouter()
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
@@ -62,6 +65,7 @@ export default function UsersManagementPage() {
             fullName: student.user.fullName,
             role: "student",
             createdAt: student.user.createdAt || new Date().toISOString(),
+            profileId: student.id, // Store student ID for navigation
           })
         })
       }
@@ -75,6 +79,7 @@ export default function UsersManagementPage() {
             fullName: teacher.name,
             role: "teacher",
             createdAt: teacher.joinDate || new Date().toISOString(),
+            profileId: teacher.id, // Store teacher ID for navigation
           })
         })
       }
@@ -88,6 +93,7 @@ export default function UsersManagementPage() {
             fullName: parent.fullName,
             role: "parent",
             createdAt: parent.createdAt || new Date().toISOString(),
+            profileId: parent.id, // Store parent ID for navigation
           })
         })
       }
@@ -197,6 +203,31 @@ export default function UsersManagementPage() {
         return "bg-green-100 text-green-700"
       default:
         return "bg-gray-100 text-gray-700"
+    }
+  }
+
+  const handleUserClick = (user: User) => {
+    if (!user.profileId) {
+      toast.error("Profile not available")
+      return
+    }
+
+    // Navigate to the appropriate profile page based on role
+    switch (user.role) {
+      case "student":
+        router.push(`/dashboard/admin/students/${user.profileId}`)
+        break
+      case "teacher":
+        router.push(`/dashboard/admin/teachers/${user.profileId}`)
+        break
+      case "parent":
+        router.push(`/dashboard/admin/parents/${user.profileId}`)
+        break
+      case "admin":
+        toast.info("Admin profiles are managed in Settings")
+        break
+      default:
+        toast.error("Unknown user type")
     }
   }
 
@@ -327,9 +358,24 @@ export default function UsersManagementPage() {
                       </TableRow>
                     ) : (
                       filteredUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.fullName}</TableCell>
-                          <TableCell>{user.email}</TableCell>
+                        <TableRow key={user.id} className="group">
+                          <TableCell className="font-medium">
+                            <button
+                              onClick={() => handleUserClick(user)}
+                              className="flex items-center gap-2 text-left hover:text-primary transition-colors group-hover:underline"
+                            >
+                              <span>{user.fullName}</span>
+                              <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                            </button>
+                          </TableCell>
+                          <TableCell>
+                            <button
+                              onClick={() => handleUserClick(user)}
+                              className="text-left hover:text-primary transition-colors"
+                            >
+                              {user.email}
+                            </button>
+                          </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
                               {getRoleIcon(user.role)}
