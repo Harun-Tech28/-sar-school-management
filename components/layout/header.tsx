@@ -221,16 +221,12 @@ export function Header({ userName, userRole, userId }: HeaderProps) {
           </button>
           <button
             onClick={() => {
-              // Navigate to user's profile based on role
+              // Navigate to user's settings based on role
               const roleRoute = userRole.toLowerCase()
-              if (roleRoute === 'admin') {
-                router.push(`/dashboard/admin/settings`)
-              } else {
-                router.push(`/dashboard/${roleRoute}/profile`)
-              }
+              router.push(`/dashboard/${roleRoute}/settings`)
             }}
             className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center hover:bg-primary/90 transition-colors cursor-pointer"
-            title="View Profile"
+            title="Settings"
           >
             <User size={20} className="text-primary-foreground" />
           </button>

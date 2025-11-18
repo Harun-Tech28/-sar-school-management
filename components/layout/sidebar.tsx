@@ -7,6 +7,7 @@ import {
   LayoutDashboard, 
   Users, 
   Calendar, 
+  Clock,
   BarChart3, 
   Bell, 
   Settings, 
@@ -232,6 +233,17 @@ export function Sidebar({ userRole }: SidebarProps) {
               label: "View Homework",
               href: `/dashboard/${userRole}/homework`,
               icon: BookOpen,
+            },
+          ]
+        },
+        {
+          label: "Timetable",
+          icon: Clock,
+          subItems: [
+            {
+              label: "My Schedule",
+              href: `/dashboard/${userRole}/timetable`,
+              icon: Clock,
             },
           ]
         },

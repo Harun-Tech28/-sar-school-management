@@ -86,6 +86,7 @@ model Teacher {
   primaryClasses  Class[]        @relation("ClassTeacher") // Classes where this teacher is the primary teacher
   grades          Grade[]
   homework        Homework[]
+  timetable       Timetable[]
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
@@ -128,6 +129,7 @@ model Class {
   teachers     ClassTeacher[]
   homework     Homework[]
   students     Student[]
+  timetable    Timetable[]
   teacher      Teacher?       @relation("ClassTeacher", fields: [teacherId], references: [id])
 
   @@index([academicYear])
@@ -564,4 +566,27 @@ model Report {
   @@index([category])
   @@index([priority])
   @@index([createdAt])
+}
+
+model Timetable {
+  id            String   @id @default(cuid())
+  classId       String
+  dayOfWeek     String   // MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY
+  startTime     String   // e.g., "08:00"
+  endTime       String   // e.g., "09:00"
+  subject       String
+  teacherId     String?
+  room          String?
+  academicYear  String   @default("2025")
+  term          String   @default("Term 1")
+  isBreak       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  class         Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher       Teacher? @relation(fields: [teacherId], references: [id])
+
+  @@index([classId])
+  @@index([teacherId])
+  @@index([dayOfWeek])
+  @@index([academicYear, term])
 }
