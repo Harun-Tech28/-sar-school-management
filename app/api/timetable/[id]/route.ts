@@ -4,10 +4,10 @@ import { prisma } from "@/lib/prisma"
 // PUT - Update timetable entry
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const updatedEntry = await prisma.timetable.update({
@@ -42,10 +42,10 @@ export async function PUT(
 // DELETE - Delete timetable entry
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     await prisma.timetable.delete({
       where: { id },

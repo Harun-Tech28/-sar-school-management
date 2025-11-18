@@ -156,6 +156,7 @@ export default function TeacherDashboard() {
                   icon={<Users size={24} />}
                   gradient="blue"
                   trend={{ value: 5, isPositive: true }}
+                  onClick={() => router.push('/dashboard/teacher/attendance')}
                 />
                 
                 <EnhancedStatCard
@@ -164,6 +165,7 @@ export default function TeacherDashboard() {
                   icon={<BookOpen size={24} />}
                   gradient="green"
                   trend={{ value: 2, isPositive: true }}
+                  onClick={() => router.push('/dashboard/teacher/attendance')}
                 />
                 
                 <EnhancedStatCard
@@ -172,6 +174,7 @@ export default function TeacherDashboard() {
                   icon={<CheckCircle size={24} />}
                   gradient="purple"
                   suffix="%"
+                  onClick={() => router.push('/dashboard/teacher/attendance')}
                 />
                 
                 <EnhancedStatCard
@@ -179,6 +182,7 @@ export default function TeacherDashboard() {
                   value={0}
                   icon={<Clock size={24} />}
                   gradient="orange"
+                  onClick={() => router.push('/dashboard/teacher/homework')}
                 />
               </DashboardGrid>
             )}

@@ -199,6 +199,28 @@ export function Sidebar({ userRole }: SidebarProps) {
           ]
         },
         {
+          label: "My Classes",
+          icon: BookOpen,
+          subItems: [
+            {
+              label: "View Classes",
+              href: `/dashboard/${userRole}/classes`,
+              icon: BookOpen,
+            },
+          ]
+        },
+        {
+          label: "My Students",
+          icon: GraduationCap,
+          subItems: [
+            {
+              label: "View Students",
+              href: `/dashboard/${userRole}/students`,
+              icon: GraduationCap,
+            },
+          ]
+        },
+        {
           label: "Attendance",
           icon: Calendar,
           subItems: [

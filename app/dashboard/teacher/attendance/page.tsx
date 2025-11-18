@@ -18,7 +18,8 @@ interface Student {
 export default function AttendancePage() {
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
-  const [selectedClass, setSelectedClass] = useState("Form 1A")
+  const [classes, setClasses] = useState<any[]>([])
+  const [selectedClass, setSelectedClass] = useState("")
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0])
   const [isLoading, setIsLoading] = useState(false)
   const [students, setStudents] = useState<Student[]>([])
@@ -31,7 +32,25 @@ export default function AttendancePage() {
     }
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
+    
+    // Fetch all classes
+    fetchClasses()
   }, [])
+  
+  const fetchClasses = async () => {
+    try {
+      const response = await fetch("/api/classes?limit=1000")
+      if (response.ok) {
+        const data = await response.json()
+        setClasses(data.data || [])
+        if (data.data && data.data.length > 0) {
+          setSelectedClass(data.data[0].id)
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching classes:", error)
+    }
+  }
 
   const handleToggleAttendance = (studentId: string) => {
     setStudents(
@@ -79,9 +98,12 @@ export default function AttendancePage() {
                   onChange={(e) => setSelectedClass(e.target.value)}
                   className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition"
                 >
-                  <option value="Form 1A">Form 1A</option>
-                  <option value="Form 2B">Form 2B</option>
-                  <option value="Form 3C">Form 3C</option>
+                  <option value="">Select a class...</option>
+                  {classes.map((cls) => (
+                    <option key={cls.id} value={cls.id}>
+                      {cls.name} - {cls.form}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>

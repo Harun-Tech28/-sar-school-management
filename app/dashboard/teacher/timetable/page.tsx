@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
@@ -52,13 +52,7 @@ export default function TeacherTimetablePage() {
     }
   }, [])
 
-  useEffect(() => {
-    if (teacherId) {
-      fetchTimetable()
-    }
-  }, [teacherId])
-
-  const fetchTimetable = async () => {
+  const fetchTimetable = useCallback(async () => {
     if (!teacherId) return
     
     setIsLoading(true)
@@ -76,7 +70,13 @@ export default function TeacherTimetablePage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [teacherId])
+
+  useEffect(() => {
+    if (teacherId) {
+      fetchTimetable()
+    }
+  }, [teacherId, fetchTimetable])
 
   const getTimetableForDay = (day: string) => {
     return timetable
