@@ -120,6 +120,11 @@ export function Sidebar({ userRole }: SidebarProps) {
               icon: BookOpen,
             },
             {
+              label: "Timetable",
+              href: `/dashboard/${userRole}/timetable`,
+              icon: Clock,
+            },
+            {
               label: "Calendar",
               href: `/dashboard/${userRole}/academic-calendar`,
               icon: CalendarDays,
