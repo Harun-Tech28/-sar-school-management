@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Sidebar } from "@/components/layout/sidebar"
+import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
 import { Calendar, Clock, Plus, Edit, Trash2, Save, X } from "lucide-react"
 import { toast } from "react-hot-toast"
@@ -42,6 +44,8 @@ const TIME_SLOTS = [
 ]
 
 export default function AdminTimetablePage() {
+  const [userName, setUserName] = useState("")
+  const [userId, setUserId] = useState("")
   const [selectedClass, setSelectedClass] = useState<string>("")
   const [classes, setClasses] = useState<Class[]>([])
   const [teachers, setTeachers] = useState<Teacher[]>([])
@@ -59,6 +63,14 @@ export default function AdminTimetablePage() {
   })
 
   useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}")
+    if (!user.email) {
+      window.location.href = "/"
+      return
+    }
+    setUserName(user.fullName || user.email.split("@")[0])
+    setUserId(user.id || user.email)
+    
     fetchClasses()
     fetchTeachers()
   }, [])
@@ -177,15 +189,22 @@ export default function AdminTimetablePage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <Calendar className="text-[#E31E24]" size={32} />
-          Timetable Management
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Create and manage class timetables for the academic year
-        </p>
+    <div className="flex bg-background min-h-screen">
+      <Sidebar userRole="admin" />
+      <div className="flex-1 flex flex-col">
+        <Header userName={userName} userRole="Admin" userId={userId} />
+        
+        <main className="flex-1 p-6 overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <Calendar className="text-[#E31E24]" size={32} />
+                Timetable Management
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Create and manage class timetables for the academic year
+              </p>
+            </div>
       </div>
 
       {/* Class Selection */}
@@ -420,6 +439,9 @@ export default function AdminTimetablePage() {
           </p>
         </Card>
       )}
+          </div>
+        </main>
+      </div>
     </div>
   )
 }
