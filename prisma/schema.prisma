@@ -175,6 +175,7 @@ model Homework {
   teacherId   String
   dueDate     DateTime
   totalMarks  Int?
+  attachments String[]             @default([])
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
   class       Class                @relation(fields: [classId], references: [id])
@@ -190,6 +191,8 @@ model HomeworkSubmission {
   id          String           @id @default(cuid())
   homeworkId  String
   studentId   String
+  content     String?
+  attachments String[]         @default([])
   submittedAt DateTime?
   grade       Int?
   feedback    String?

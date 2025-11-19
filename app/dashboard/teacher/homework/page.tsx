@@ -22,8 +22,18 @@ interface Assignment {
 export default function TeacherHomeworkPage() {
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
+  const [teacherId, setTeacherId] = useState("")
   const [showCreateForm, setShowCreateForm] = useState(false)
-  const [assignments] = useState<Assignment[]>([])
+  const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [classes, setClasses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    subject: "",
+    classId: "",
+    dueDate: "",
+  })
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}")
@@ -33,7 +43,128 @@ export default function TeacherHomeworkPage() {
     }
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
+    
+    // Fetch teacher data and homework
+    fetchTeacherData(user.id)
   }, [])
+
+  const fetchTeacherData = async (userId: string) => {
+    try {
+      console.log("Fetching teacher data for userId:", userId)
+      
+      // Get teacher ID
+      const teacherRes = await fetch(`/api/teachers?userId=${userId}`)
+      const teacherData = await teacherRes.json()
+      
+      console.log("Teacher data response:", teacherData)
+      
+      if (teacherData.success && teacherData.data.length > 0) {
+        const teacher = teacherData.data[0]
+        console.log("Teacher found:", teacher)
+        setTeacherId(teacher.id)
+        
+        // Get teacher's classes
+        console.log("Fetching classes for teacherId:", teacher.id)
+        const classesRes = await fetch(`/api/teachers/me/classes?teacherId=${teacher.id}`)
+        const classesData = await classesRes.json()
+        
+        console.log("Classes data response:", classesData)
+        
+        // Always fetch ALL classes so teachers can create homework for any class
+        console.log("Fetching all classes for homework creation")
+        const allClassesRes = await fetch("/api/classes")
+        const allClassesData = await allClassesRes.json()
+        
+        if (allClassesData.success) {
+          console.log("Setting all classes:", allClassesData.data)
+          setClasses(allClassesData.data)
+        } else {
+          console.error("Failed to fetch all classes:", allClassesData.error)
+          // Fallback to teacher's classes if all classes fetch fails
+          if (classesData.success) {
+            setClasses(classesData.data || [])
+          }
+        }
+        
+        // Get homework
+        fetchHomework(teacher.id)
+      } else {
+        console.error("No teacher found for user")
+      }
+    } catch (error) {
+      console.error("Error fetching teacher data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchHomework = async (teacherId: string) => {
+    try {
+      const res = await fetch(`/api/homework?teacherId=${teacherId}`)
+      const data = await res.json()
+      
+      if (data.success) {
+        const formatted = data.data.map((hw: any) => ({
+          id: hw.id,
+          title: hw.title,
+          class: hw.class.name,
+          subject: hw.subject,
+          dueDate: hw.dueDate,
+          totalStudents: hw._count.submissions,
+          submitted: hw.submissions.filter((s: any) => s.status === "SUBMITTED" || s.status === "GRADED").length,
+          pending: hw.submissions.filter((s: any) => s.status === "PENDING").length,
+        }))
+        setAssignments(formatted)
+      }
+    } catch (error) {
+      console.error("Error fetching homework:", error)
+    }
+  }
+
+  const handleCreateHomework = async () => {
+    console.log("handleCreateHomework called")
+    console.log("Form data:", formData)
+    console.log("Teacher ID:", teacherId)
+    
+    if (!formData.title || !formData.classId || !formData.dueDate) {
+      alert("Please fill in all required fields")
+      return
+    }
+
+    try {
+      console.log("Sending request to /api/homework...")
+      const res = await fetch("/api/homework", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          teacherId,
+        }),
+      })
+
+      console.log("Response status:", res.status)
+      const data = await res.json()
+      console.log("Response data:", data)
+      
+      if (data.success) {
+        alert("Homework created successfully!")
+        setShowCreateForm(false)
+        setFormData({
+          title: "",
+          description: "",
+          subject: "",
+          classId: "",
+          dueDate: "",
+        })
+        fetchHomework(teacherId)
+      } else {
+        alert("Failed to create homework: " + data.error)
+      }
+    } catch (error) {
+      console.error("Error creating homework:", error)
+      alert("Failed to create homework")
+    }
+  }
 
   const totalAssignments = assignments.length
   const totalSubmissions = assignments.reduce((sum, a) => sum + a.submitted, 0)
@@ -69,34 +200,56 @@ export default function TeacherHomeworkPage() {
                 <h2 className="text-xl font-semibold mb-4 text-foreground">Create New Assignment</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Assignment Title</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Assignment Title *</label>
                     <input
                       type="text"
                       placeholder="e.g., Chapter 5 Exercises"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">Subject</label>
-                    <select className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-                      <option>Mathematics</option>
-                      <option>English</option>
-                      <option>Science</option>
-                      <option>History</option>
-                    </select>
+                    <input
+                      type="text"
+                      placeholder="e.g., Mathematics"
+                      value={formData.subject}
+                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Class</label>
-                    <select className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary">
-                      <option>Form 1A</option>
-                      <option>Form 2B</option>
-                      <option>Form 3C</option>
+                    <label className="block text-sm font-medium text-foreground mb-2">Class *</label>
+                    <select 
+                      value={formData.classId}
+                      onChange={(e) => setFormData({ ...formData, classId: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    >
+                      <option value="">Select a class</option>
+                      {classes.map((cls) => (
+                        <option key={cls.id} value={cls.id}>
+                          {cls.name}
+                        </option>
+                      ))}
                     </select>
+                    {classes.length === 0 && (
+                      <p className="text-xs text-destructive mt-1">
+                        No classes found. Check console for details.
+                      </p>
+                    )}
+                    {classes.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {classes.length} class(es) available
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Due Date</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">Due Date *</label>
                     <input
                       type="date"
+                      value={formData.dueDate}
+                      onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -105,6 +258,8 @@ export default function TeacherHomeworkPage() {
                     <textarea
                       rows={3}
                       placeholder="Assignment instructions..."
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       className="w-full px-4 py-2 rounded-lg bg-input border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
@@ -148,9 +303,7 @@ export default function TeacherHomeworkPage() {
                   </div>
                 </div>
                 <div className="flex gap-2 mt-4">
-                  <Button onClick={() => {
-                    alert("Homework creation feature is under development.\n\nTo implement:\n1. Add Homework model to database\n2. Create homework API endpoints\n3. Connect form to backend\n\nThis is currently a UI mockup.")
-                  }}>
+                  <Button onClick={handleCreateHomework}>
                     Create Assignment
                   </Button>
                   <Button variant="outline" onClick={() => setShowCreateForm(false)}>Cancel</Button>
@@ -192,7 +345,12 @@ export default function TeacherHomeworkPage() {
             </div>
 
             {/* Assignments Overview */}
-            {assignments.length > 0 ? (
+            {loading ? (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">⏳</div>
+                <p className="text-gray-600 text-lg">Loading homework...</p>
+              </div>
+            ) : assignments.length > 0 ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="p-6 bg-card border-border">
                   <h2 className="text-xl font-semibold mb-4 text-foreground">Assignment Progress</h2>

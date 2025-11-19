@@ -476,12 +476,9 @@ export function Sidebar({ userRole }: SidebarProps) {
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        w-64 bg-primary min-h-screen flex flex-col shadow-xl
-        fixed lg:static top-0 left-0 z-50
-        transform transition-transform duration-300 ease-in-out
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
+      <aside className="w-64 bg-primary min-h-screen flex flex-col shadow-xl fixed lg:static top-0 left-0 z-50 transform transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 data-[open=true]:translate-x-0"
+        data-open={isMobileMenuOpen}
+      >
         {/* Mobile Close Button */}
         <button
           onClick={closeMobileMenu}

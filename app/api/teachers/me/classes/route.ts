@@ -17,10 +17,19 @@ export async function GET(request: NextRequest) {
 
     console.log(`[teachers/me/classes] Fetching classes for teacher: ${teacherId}`)
 
-    // Simplified query - removed unnecessary includes
+    // Fetch classes where teacher is primary teacher OR teaches through ClassTeacher
     const classes = await prisma.class.findMany({
       where: {
-        teacherId: teacherId,
+        OR: [
+          { teacherId: teacherId },
+          {
+            teachers: {
+              some: {
+                teacherId: teacherId,
+              },
+            },
+          },
+        ],
       },
       select: {
         id: true,

@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { title, description, classId, teacherId, dueDate, subject, attachments } = body
+    const { title, description, classId, teacherId, dueDate, subject, attachments, totalMarks } = body
 
     if (!title || !classId || !teacherId || !dueDate) {
       return NextResponse.json(
@@ -91,6 +91,8 @@ export async function POST(request: NextRequest) {
         teacherId,
         dueDate: new Date(dueDate),
         subject: subject || "",
+        attachments: attachments || [],
+        totalMarks: totalMarks || null,
       },
       include: {
         teacher: {
@@ -110,6 +112,22 @@ export async function POST(request: NextRequest) {
         },
       },
     })
+
+    // Create pending submissions for all students in the class
+    const students = await prisma.student.findMany({
+      where: { classId },
+      select: { id: true },
+    })
+
+    if (students.length > 0) {
+      await prisma.homeworkSubmission.createMany({
+        data: students.map(student => ({
+          homeworkId: homework.id,
+          studentId: student.id,
+          status: "PENDING",
+        })),
+      })
+    }
 
     return NextResponse.json({
       success: true,
