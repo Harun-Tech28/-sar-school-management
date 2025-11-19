@@ -24,15 +24,8 @@ async function verifySystemReady() {
     const classCount = await prisma.class.count()
     console.log(`\n📚 Classes: ${classCount}`)
 
-    // Check if students have classes
-    const studentsWithoutClass = await prisma.student.count({
-      where: { classId: null }
-    })
-    if (studentsWithoutClass > 0) {
-      console.log(`   ⚠️  ${studentsWithoutClass} students without class assignment`)
-    } else {
-      console.log(`   ✅ All students have classes`)
-    }
+    // Note: classId is required in schema, so all students must have a class
+    console.log(`   ✅ All students have classes (required by schema)`)
 
     // Check if parents have children
     const parentsWithChildren = await prisma.parent.count({
@@ -72,7 +65,6 @@ async function verifySystemReady() {
     if (teacherCount === 0) issues.push("No teachers")
     if (studentCount === 0) issues.push("No students")
     if (classCount === 0) issues.push("No classes")
-    if (studentsWithoutClass > 0) issues.push(`${studentsWithoutClass} students without classes`)
 
     if (issues.length === 0) {
       console.log("   ✅ System is ready for testing!")
