@@ -173,38 +173,45 @@ export function ActivityFeed({
       ) : (
         <div className="space-y-3">
           {filteredActivities.map((activity) => {
-            const ActivityWrapper = activity.actionUrl ? Link : 'div'
-            const wrapperProps = activity.actionUrl 
-              ? { href: activity.actionUrl, className: "block hover:bg-gray-50 -mx-2 px-2 py-2 rounded-lg transition-colors" }
-              : { className: "block" }
+            const content = (
+              <div className="flex items-start gap-3">
+                {/* Icon */}
+                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${getColorClass(activity.color)}`}>
+                  <span className="text-lg">{activity.icon}</span>
+                </div>
 
-            return (
-              <ActivityWrapper key={activity.id} {...wrapperProps}>
-                <div className="flex items-start gap-3">
-                  {/* Icon */}
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${getColorClass(activity.color)}`}>
-                    <span className="text-lg">{activity.icon}</span>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-800 leading-relaxed">{activity.description}</p>
-                    <div className="flex items-center gap-2 mt-1.5">
-                      <p className="text-xs text-gray-500">
-                        {getRelativeTime(activity.timestamp)}
-                      </p>
-                      {activity.category && (
-                        <>
-                          <span className="text-gray-300">•</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoryBadgeColor(activity.category)}`}>
-                            {activity.category}
-                          </span>
-                        </>
-                      )}
-                    </div>
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-800 leading-relaxed">{activity.description}</p>
+                  <div className="flex items-center gap-2 mt-1.5">
+                    <p className="text-xs text-gray-500">
+                      {getRelativeTime(activity.timestamp)}
+                    </p>
+                    {activity.category && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getCategoryBadgeColor(activity.category)}`}>
+                          {activity.category}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
-              </ActivityWrapper>
+              </div>
+            )
+
+            return activity.actionUrl ? (
+              <Link 
+                key={activity.id} 
+                href={activity.actionUrl} 
+                className="block hover:bg-gray-50 -mx-2 px-2 py-2 rounded-lg transition-colors"
+              >
+                {content}
+              </Link>
+            ) : (
+              <div key={activity.id} className="block">
+                {content}
+              </div>
             )
           })}
         </div>
