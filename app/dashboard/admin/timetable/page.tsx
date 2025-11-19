@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
-import { Calendar, Clock, Plus, Edit, Trash2, Save, X } from "lucide-react"
+import { Calendar, Clock, Plus, Trash2, Save, X } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 interface TimetableEntry {
@@ -26,14 +26,12 @@ interface TimetableEntry {
 interface Class {
   id: string
   name: string
-  level: string
+  form: string
 }
 
 interface Teacher {
   id: string
-  user: {
-    fullName: string
-  }
+  name: string
 }
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"]
@@ -86,7 +84,7 @@ export default function AdminTimetablePage() {
       const response = await fetch("/api/classes")
       if (response.ok) {
         const data = await response.json()
-        setClasses(data.classes || [])
+        setClasses(data.data || [])
       }
     } catch (error) {
       console.error("Error fetching classes:", error)
@@ -98,7 +96,7 @@ export default function AdminTimetablePage() {
       const response = await fetch("/api/teachers")
       if (response.ok) {
         const data = await response.json()
-        setTeachers(data.teachers || [])
+        setTeachers(data.data || [])
       }
     } catch (error) {
       console.error("Error fetching teachers:", error)
@@ -205,10 +203,9 @@ export default function AdminTimetablePage() {
                 Create and manage class timetables for the academic year
               </p>
             </div>
-      </div>
 
-      {/* Class Selection */}
-      <Card className="p-6 mb-6 shadow-lg">
+            {/* Class Selection */}
+            <Card className="p-6 mb-6 shadow-lg">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Select Class</h2>
           {selectedClass && (
@@ -229,15 +226,15 @@ export default function AdminTimetablePage() {
           <option value="">Select a class...</option>
           {classes.map((cls) => (
             <option key={cls.id} value={cls.id}>
-              {cls.name} - {cls.level}
+              {cls.name} - {cls.form}
             </option>
           ))}
         </select>
       </Card>
 
-      {/* Add Entry Form */}
-      {showAddForm && (
-        <Card className="p-6 mb-6 shadow-lg border-l-4 border-[#E31E24]">
+            {/* Add Entry Form */}
+            {showAddForm && (
+              <Card className="p-6 mb-6 shadow-lg border-l-4 border-[#E31E24]">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Add New Entry</h3>
             <button
@@ -309,7 +306,7 @@ export default function AdminTimetablePage() {
                 <option value="">Select teacher...</option>
                 {teachers.map(teacher => (
                   <option key={teacher.id} value={teacher.id}>
-                    {teacher.user.fullName}
+                    {teacher.name}
                   </option>
                 ))}
               </select>
@@ -353,13 +350,13 @@ export default function AdminTimetablePage() {
             >
               Cancel
             </button>
-          </div>
-        </Card>
-      )}
+              </div>
+            </Card>
+            )}
 
-      {/* Timetable Display */}
-      {selectedClass && (
-        <Card className="p-6 shadow-lg">
+            {/* Timetable Display */}
+            {selectedClass && (
+              <Card className="p-6 shadow-lg">
           <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <Clock className="text-[#E31E24]" size={24} />
             Weekly Timetable
@@ -423,22 +420,22 @@ export default function AdminTimetablePage() {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
-        </Card>
-      )}
+              </div>
+            )}
+          </Card>
+            )}
 
-      {!selectedClass && (
-        <Card className="p-12 text-center shadow-lg">
-          <Calendar className="mx-auto text-gray-400 mb-4" size={64} />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">
-            Select a Class to Manage Timetable
-          </h3>
-          <p className="text-gray-500">
-            Choose a class from the dropdown above to view and edit its timetable
-          </p>
-        </Card>
-      )}
+            {!selectedClass && (
+              <Card className="p-12 text-center shadow-lg">
+                <Calendar className="mx-auto text-gray-400 mb-4" size={64} />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                  Select a Class to Manage Timetable
+                </h3>
+                <p className="text-gray-500">
+                  Choose a class from the dropdown above to view and edit its timetable
+                </p>
+              </Card>
+            )}
           </div>
         </main>
       </div>
