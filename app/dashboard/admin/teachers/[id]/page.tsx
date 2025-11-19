@@ -50,59 +50,68 @@ export default function EditTeacherPage() {
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
 
-    // Load teacher data (demo data)
-    const demoTeachers: TeacherData[] = [
-      {
-        id: "1",
-        name: "Mr. Kwame Agyeman",
-        email: "k.agyeman@sar.edu",
-        phone: "+233 24 123 4567",
-        subject: "Mathematics",
-        classes: "Form 1A, Form 2B",
-        joinDate: "2020-09-01",
-        status: "Active",
-      },
-      {
-        id: "2",
-        name: "Miss Akosua Mensah",
-        email: "a.mensah@sar.edu",
-        phone: "+233 24 234 5678",
-        subject: "English Language",
-        classes: "Form 1B, Form 3A",
-        joinDate: "2019-01-15",
-        status: "Active",
-      },
-      {
-        id: "3",
-        name: "Mr. Kofi Boateng",
-        email: "k.boateng@sar.edu",
-        phone: "+233 24 345 6789",
-        subject: "Science",
-        classes: "Form 2A, Form 3B",
-        joinDate: "2021-03-10",
-        status: "Active",
-      },
-    ]
+    // Load teacher data from API
+    fetchTeacherData()
+  }, [teacherId])
 
-    const teacherData = demoTeachers.find((t) => t.id === teacherId)
-    if (teacherData) {
-      setFormData(teacherData)
-    } else {
-      toast.error("Teacher not found")
+  const fetchTeacherData = async () => {
+    try {
+      setIsLoading(true)
+      const response = await fetch(`/api/teachers/${teacherId}`)
+      const data = await response.json()
+
+      if (data.success) {
+        const teacher = data.data
+        setFormData({
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email,
+          phone: teacher.phone || "",
+          subject: teacher.subject || "",
+          classes: teacher.classes?.map((c: any) => c.name).join(", ") || "",
+          joinDate: teacher.joinDate ? new Date(teacher.joinDate).toISOString().split('T')[0] : "",
+          status: "Active",
+        })
+      } else {
+        toast.error("Teacher not found")
+        router.push("/dashboard/admin/teachers")
+      }
+    } catch (error) {
+      console.error("Error fetching teacher:", error)
+      toast.error("Failed to load teacher data")
       router.push("/dashboard/admin/teachers")
+    } finally {
+      setIsLoading(false)
     }
-  }, [teacherId, router])
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      // In a real app, this would call an API endpoint
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const response = await fetch(`/api/teachers/${teacherId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fullName: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          joinDate: formData.joinDate,
+        }),
+      })
 
-      toast.success("Teacher updated successfully!")
-      router.push("/dashboard/admin/teachers")
+      const data = await response.json()
+
+      if (data.success) {
+        toast.success("Teacher updated successfully!")
+        router.push("/dashboard/admin/teachers")
+      } else {
+        toast.error(data.error || "Failed to update teacher")
+      }
     } catch (error) {
       console.error("Error updating teacher:", error)
       toast.error("Failed to update teacher")
@@ -139,8 +148,16 @@ export default function EditTeacherPage() {
               <p className="text-muted-foreground mt-1">Update teacher information</p>
             </div>
 
+            {/* Loading State */}
+            {isLoading && !formData.id && (
+              <div className="bg-card rounded-lg border border-border p-12 text-center">
+                <p className="text-muted-foreground">Loading teacher data...</p>
+              </div>
+            )}
+
             {/* Edit Form */}
-            <form onSubmit={handleSubmit} className="bg-card rounded-lg border border-border p-6 space-y-6">
+            {formData.id && (
+              <form onSubmit={handleSubmit} className="bg-card rounded-lg border border-border p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Full Name */}
                 <div className="space-y-2 md:col-span-2">
@@ -245,6 +262,7 @@ export default function EditTeacherPage() {
                 </Link>
               </div>
             </form>
+            )}
           </div>
         </main>
       </div>
