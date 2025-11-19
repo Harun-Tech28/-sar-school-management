@@ -222,27 +222,27 @@ export async function GET(request: NextRequest) {
     // 8. Upcoming Exams (within next 7 days)
     const upcomingExams = await prisma.exam.findMany({
       where: {
-        date: {
+        startDate: {
           gte: new Date(),
           lte: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         }
       },
       take: 2,
-      orderBy: { date: "asc" },
+      orderBy: { startDate: "asc" },
       select: {
         id: true,
         name: true,
-        date: true,
-        class: { select: { name: true } }
+        startDate: true,
+        examType: true
       }
     })
 
     upcomingExams.forEach(exam => {
-      const daysUntil = Math.ceil((exam.date.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+      const daysUntil = Math.ceil((exam.startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
       activities.push({
         id: `exam_${exam.id}`,
         icon: "📝",
-        description: `Upcoming: ${exam.name} for ${exam.class.name} in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
+        description: `Upcoming: ${exam.name} (${exam.examType}) in ${daysUntil} day${daysUntil !== 1 ? 's' : ''}`,
         timestamp: Date.now() - 1000, // Recent but not newest
         color: "purple",
         category: "Academic",
