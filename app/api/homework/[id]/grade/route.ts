@@ -26,7 +26,6 @@ export async function POST(
         grade: grade || null,
         feedback: feedback || "",
         status: "GRADED",
-        gradedAt: new Date(),
       },
       include: {
         student: {
