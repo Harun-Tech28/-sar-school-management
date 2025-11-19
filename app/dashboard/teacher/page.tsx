@@ -309,7 +309,7 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Recent Activity */}
-            <ActivityFeed userRole="teacher" maxItems={10} />
+            <ActivityFeed userRole="teacher" maxItems={10} showFilters={true} />
           </div>
         </main>
       </div>

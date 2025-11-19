@@ -504,52 +504,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="text-2xl">🔔</span>
-                Recent Activity
-              </h2>
-              {activities.length > 0 ? (
-                <div className="space-y-3">
-                  {activities.slice(0, 5).map((activity) => (
-                    <div
-                      key={activity.id}
-                      onClick={activity.onClick}
-                      className="flex items-start gap-3 p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-xl cursor-pointer transition-all border border-transparent hover:border-gray-200"
-                    >
-                      <div className={`p-3 rounded-xl ${
-                        activity.color === 'green' ? 'bg-green-100' :
-                        activity.color === 'blue' ? 'bg-blue-100' :
-                        activity.color === 'purple' ? 'bg-purple-100' :
-                        activity.color === 'orange' ? 'bg-orange-100' :
-                        'bg-gray-100'
-                      }`}>
-                        <activity.icon className={`${
-                          activity.color === 'green' ? 'text-green-600' :
-                          activity.color === 'blue' ? 'text-blue-600' :
-                          activity.color === 'purple' ? 'text-purple-600' :
-                          activity.color === 'orange' ? 'text-orange-600' :
-                          'text-gray-600'
-                        }`} size={20} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900 text-sm">{activity.title}</p>
-                        <p className="text-xs text-gray-600 mt-1">{activity.description}</p>
-                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
-                          <span>🕐</span>
-                          {activity.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-3">📭</div>
-                  <p className="text-gray-500 text-sm">No recent activities</p>
-                </div>
-              )}
-            </div>
+            <NotificationActivityFeed userRole="admin" maxItems={10} showFilters={true} />
           </div>
         </main>
       </div>

@@ -28,12 +28,14 @@ export interface Notification {
 
 export interface Activity {
   id: string
-  type: ActivityType
+  type?: ActivityType
   description: string
   timestamp: number
   userId?: string
   icon: string
   color: string
+  category?: string
+  actionUrl?: string
 }
 
 export interface NotificationStore {

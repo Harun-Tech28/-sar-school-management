@@ -160,7 +160,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Recent Activity */}
-            <ActivityFeed userRole="student" maxItems={10} />
+            <ActivityFeed userRole="student" maxItems={10} showFilters={true} />
           </div>
         </main>
       </div>
