@@ -45,8 +45,6 @@ export async function POST(
       const submission = await prisma.homeworkSubmission.update({
         where: { id: existingSubmission.id },
         data: {
-          content: content || "",
-          attachments: attachments || [],
           submittedAt: new Date(),
           status: "SUBMITTED",
         },
@@ -75,9 +73,8 @@ export async function POST(
       data: {
         homeworkId: id,
         studentId,
-        content: content || "",
-        attachments: attachments || [],
         status: "SUBMITTED",
+        submittedAt: new Date(),
       },
       include: {
         student: {
