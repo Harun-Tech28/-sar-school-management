@@ -13,16 +13,53 @@ const teacherSchema = z.object({
   joinDate: z.string().optional(),
 })
 
-// GET /api/teachers - Get all teachers
+// GET /api/teachers - Get all teachers OR get teacher by userId
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
+    const userId = searchParams.get("userId")
+    
+    // If userId is provided, return just that teacher (fast query)
+    if (userId) {
+      const teacher = await prisma.teacher.findUnique({
+        where: { userId },
+        select: {
+          id: true,
+          userId: true,
+          subject: true,
+          user: {
+            select: {
+              fullName: true,
+              email: true,
+            },
+          },
+        },
+      })
+
+      if (!teacher) {
+        return NextResponse.json({
+          success: true,
+          teachers: [],
+        })
+      }
+
+      return NextResponse.json({
+        success: true,
+        teachers: [{
+          id: teacher.id,
+          userId: teacher.userId,
+          name: teacher.user.fullName,
+          email: teacher.user.email,
+          subject: teacher.subject,
+        }],
+      })
+    }
+
+    // Otherwise, fetch all teachers (slower query)
     const search = searchParams.get("search") || ""
     const page = parseInt(searchParams.get("page") || "1")
     const limit = parseInt(searchParams.get("limit") || "50")
     const skip = (page - 1) * limit
-
-    await prisma.$connect()
 
     // Build where clause for search
     const where = search

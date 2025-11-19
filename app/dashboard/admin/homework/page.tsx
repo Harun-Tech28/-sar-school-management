@@ -4,27 +4,34 @@ import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { FileText, Users, TrendingUp, CheckCircle } from "lucide-react"
+import { FileText, Eye, Trash2, Calendar, Clock } from "lucide-react"
+import { toast } from "react-hot-toast"
 
-interface ClassStats {
-  class: string
-  totalAssignments: number
-  avgCompletion: number
-  avgGrade: number
-}
-
-interface TeacherStats {
-  teacher: string
+interface Homework {
+  id: string
+  title: string
+  description: string
   subject: string
-  assignments: number
-  avgCompletion: number
+  dueDate: string
+  class: {
+    name: string
+    form: string
+  }
+  teacher: {
+    user: {
+      fullName: string
+    }
+  }
+  _count: {
+    submissions: number
+  }
 }
 
 export default function AdminHomeworkPage() {
   const [userName, setUserName] = useState("")
   const [userId, setUserId] = useState("")
+  const [homework, setHomework] = useState<Homework[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}")
@@ -34,32 +41,59 @@ export default function AdminHomeworkPage() {
     }
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
+    
+    fetchHomework()
   }, [])
 
-  const classStats: ClassStats[] = [
-    { class: "Form 1A", totalAssignments: 24, avgCompletion: 89, avgGrade: 78 },
-    { class: "Form 1B", totalAssignments: 22, avgCompletion: 92, avgGrade: 82 },
-    { class: "Form 2A", totalAssignments: 26, avgCompletion: 85, avgGrade: 75 },
-    { class: "Form 2B", totalAssignments: 25, avgCompletion: 88, avgGrade: 80 },
-    { class: "Form 3A", totalAssignments: 28, avgCompletion: 91, avgGrade: 84 },
-    { class: "Form 3B", totalAssignments: 27, avgCompletion: 87, avgGrade: 79 },
-  ]
+  const fetchHomework = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/homework")
+      if (response.ok) {
+        const data = await response.json()
+        setHomework(data.data || [])
+      } else {
+        toast.error("Failed to load homework")
+      }
+    } catch (error) {
+      console.error("Error fetching homework:", error)
+      toast.error("Failed to load homework")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-  const teacherStats: TeacherStats[] = [
-    { teacher: "Mr. Mensah", subject: "Mathematics", assignments: 18, avgCompletion: 90 },
-    { teacher: "Mrs. Asante", subject: "English", assignments: 16, avgCompletion: 88 },
-    { teacher: "Dr. Boateng", subject: "Science", assignments: 20, avgCompletion: 92 },
-    { teacher: "Ms. Osei", subject: "History", assignments: 14, avgCompletion: 85 },
-    { teacher: "Mr. Addo", subject: "Geography", assignments: 12, avgCompletion: 87 },
-  ]
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this homework?")) return
 
-  const monthlyData = [
-    { month: "Sep", assignments: 45, completion: 88 },
-    { month: "Oct", assignments: 52, completion: 90 },
-    { month: "Nov", assignments: 48, completion: 87 },
-    { month: "Dec", assignments: 38, completion: 85 },
-    { month: "Jan", assignments: 55, completion: 91 },
-  ]
+    try {
+      const response = await fetch(`/api/homework/${id}`, {
+        method: "DELETE",
+      })
+
+      if (response.ok) {
+        toast.success("Homework deleted successfully")
+        fetchHomework()
+      } else {
+        toast.error("Failed to delete homework")
+      }
+    } catch (error) {
+      console.error("Error deleting homework:", error)
+      toast.error("Failed to delete homework")
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  const isOverdue = (dueDate: string) => {
+    return new Date(dueDate) < new Date()
+  }
 
   return (
     <div className="flex bg-background min-h-screen">
@@ -69,171 +103,146 @@ export default function AdminHomeworkPage() {
 
         <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">
-            {/* Page Header */}
             <div className="mb-6">
-              <h1 className="text-3xl font-bold text-foreground">Homework Management System</h1>
-              <p className="text-muted-foreground mt-1">Monitor homework assignments and completion across all classes</p>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <FileText className="text-[#E31E24]" size={32} />
+                Homework Management
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Monitor and manage homework assignments across all classes
+              </p>
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <Card className="p-4 bg-card border-border">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <Card className="p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm">Total Assignments</p>
-                    <p className="text-3xl font-bold text-foreground">152</p>
+                    <p className="text-gray-600 text-sm">Total Assignments</p>
+                    <p className="text-3xl font-bold text-gray-900">{homework.length}</p>
                   </div>
-                  <FileText className="text-primary" size={32} />
+                  <FileText className="text-[#E31E24]" size={40} />
                 </div>
               </Card>
 
-              <Card className="p-4 bg-card border-border">
+              <Card className="p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm">Avg Completion</p>
-                    <p className="text-3xl font-bold text-accent">89%</p>
+                    <p className="text-gray-600 text-sm">Total Submissions</p>
+                    <p className="text-3xl font-bold text-green-600">
+                      {homework.reduce((sum, hw) => sum + hw._count.submissions, 0)}
+                    </p>
                   </div>
-                  <CheckCircle className="text-accent" size={32} />
+                  <Clock className="text-green-600" size={40} />
                 </div>
               </Card>
 
-              <Card className="p-4 bg-card border-border">
+              <Card className="p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-muted-foreground text-sm">Active Teachers</p>
-                    <p className="text-3xl font-bold text-foreground">24</p>
+                    <p className="text-gray-600 text-sm">Overdue</p>
+                    <p className="text-3xl font-bold text-orange-600">
+                      {homework.filter(hw => isOverdue(hw.dueDate)).length}
+                    </p>
                   </div>
-                  <Users className="text-chart-2" size={32} />
-                </div>
-              </Card>
-
-              <Card className="p-4 bg-card border-border">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-muted-foreground text-sm">Avg Grade</p>
-                    <p className="text-3xl font-bold text-chart-3">80%</p>
-                  </div>
-                  <TrendingUp className="text-chart-3" size={32} />
+                  <Calendar className="text-orange-600" size={40} />
                 </div>
               </Card>
             </div>
 
-            {/* Monthly Trend Chart */}
-            <Card className="p-6 bg-card border-border mb-6">
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Monthly Assignment Trends</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="assignments" fill="#EF3B39" name="Assignments Created" />
-                  <Bar yAxisId="right" dataKey="completion" fill="#10B981" name="Avg Completion %" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Card>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Class Performance */}
-              <Card className="p-6 bg-card border-border">
-                <h2 className="text-xl font-semibold mb-4 text-foreground">Class Performance Overview</h2>
+            {/* Homework List */}
+            <Card className="p-6 shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">All Homework Assignments</h2>
+              
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#E31E24] border-t-transparent"></div>
+                </div>
+              ) : homework.length === 0 ? (
+                <div className="text-center py-12">
+                  <FileText className="mx-auto text-gray-400 mb-4" size={64} />
+                  <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                    No Homework Assignments
+                  </h3>
+                  <p className="text-gray-500">
+                    Teachers haven't created any homework assignments yet
+                  </p>
+                </div>
+              ) : (
                 <div className="space-y-4">
-                  {classStats.map((stat) => (
-                    <div key={stat.class} className="p-4 rounded-lg bg-muted/50 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="font-semibold text-foreground">{stat.class}</span>
-                        <span className="text-sm text-muted-foreground">{stat.totalAssignments} assignments</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">Completion Rate</p>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-muted rounded-full h-2">
-                              <div
-                                className={`rounded-full h-2 ${
-                                  stat.avgCompletion >= 90 ? "bg-accent" : 
-                                  stat.avgCompletion >= 80 ? "bg-chart-3" : 
-                                  "bg-destructive"
-                                }`}
-                                style={{ width: `${stat.avgCompletion}%` }}
-                              ></div>
+                  {homework.map((hw) => (
+                    <div
+                      key={hw.id}
+                      className={`p-4 rounded-lg border-2 ${
+                        isOverdue(hw.dueDate)
+                          ? "border-orange-300 bg-orange-50"
+                          : "border-gray-200 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              {hw.title}
+                            </h3>
+                            {isOverdue(hw.dueDate) && (
+                              <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded">
+                                OVERDUE
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-gray-600 text-sm mb-3">{hw.description}</p>
+                          <div className="flex flex-wrap gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-700">Class:</span>
+                              <span className="text-gray-600">
+                                {hw.class.name} - {hw.class.form}
+                              </span>
                             </div>
-                            <span className={`text-sm font-bold ${
-                              stat.avgCompletion >= 90 ? "text-accent" : 
-                              stat.avgCompletion >= 80 ? "text-chart-3" : 
-                              "text-destructive"
-                            }`}>
-                              {stat.avgCompletion}%
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-700">Subject:</span>
+                              <span className="text-gray-600">{hw.subject}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-700">Teacher:</span>
+                              <span className="text-gray-600">{hw.teacher.user.fullName}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Calendar size={16} className="text-gray-500" />
+                              <span className="text-gray-600">
+                                Due: {formatDate(hw.dueDate)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-700">Submissions:</span>
+                              <span className="text-green-600 font-semibold">
+                                {hw._count.submissions}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-1">Average Grade</p>
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 bg-muted rounded-full h-2">
-                              <div
-                                className={`rounded-full h-2 ${
-                                  stat.avgGrade >= 80 ? "bg-accent" : 
-                                  stat.avgGrade >= 70 ? "bg-chart-3" : 
-                                  "bg-destructive"
-                                }`}
-                                style={{ width: `${stat.avgGrade}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-sm font-bold text-foreground">{stat.avgGrade}%</span>
-                          </div>
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => window.location.href = `/dashboard/admin/homework/${hw.id}`}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="View Details"
+                          >
+                            <Eye size={20} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(hw.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 size={20} />
+                          </button>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </Card>
-
-              {/* Teacher Statistics */}
-              <Card className="p-6 bg-card border-border">
-                <h2 className="text-xl font-semibold mb-4 text-foreground">Teacher Activity</h2>
-                <div className="space-y-3">
-                  {teacherStats.map((stat, index) => (
-                    <div key={index} className="p-4 rounded-lg border border-border">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <p className="font-semibold text-foreground">{stat.teacher}</p>
-                          <p className="text-xs text-muted-foreground">{stat.subject}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-primary">{stat.assignments}</p>
-                          <p className="text-xs text-muted-foreground">assignments</p>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Student Completion</span>
-                          <span className={`font-semibold ${
-                            stat.avgCompletion >= 90 ? "text-accent" : 
-                            stat.avgCompletion >= 85 ? "text-chart-3" : 
-                            "text-destructive"
-                          }`}>
-                            {stat.avgCompletion}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div
-                            className={`rounded-full h-2 ${
-                              stat.avgCompletion >= 90 ? "bg-accent" : 
-                              stat.avgCompletion >= 85 ? "bg-chart-3" : 
-                              "bg-destructive"
-                            }`}
-                            style={{ width: `${stat.avgCompletion}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
+              )}
+            </Card>
           </div>
         </main>
       </div>

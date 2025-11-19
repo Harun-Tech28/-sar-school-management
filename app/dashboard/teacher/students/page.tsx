@@ -30,36 +30,47 @@ export default function TeacherStudentsPage() {
       return
     }
     
-    fetchTeacherId(user.id)
+    // Use teacherId if available, otherwise use userId
+    const teacherId = user.teacherId || user.id
+    console.log("Teacher ID:", teacherId, "User:", user)
+    
+    if (teacherId) {
+      fetchStudents(teacherId)
+    } else {
+      setIsLoading(false)
+      toast.error("Teacher ID not found")
+    }
   }, [])
 
-  const fetchTeacherId = async (userId: string) => {
-    try {
-      const response = await fetch(`/api/teachers?userId=${userId}`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.teachers && data.teachers.length > 0) {
-          fetchStudents(data.teachers[0].id)
-        }
-      }
-    } catch (error) {
-      console.error("Error:", error)
-      setIsLoading(false)
-    }
-  }
-
   const fetchStudents = async (teacherId: string) => {
+    setIsLoading(true)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+    
     try {
-      const response = await fetch(`/api/teachers/me/students?teacherId=${teacherId}`)
+      const response = await fetch(`/api/teachers/me/students?teacherId=${teacherId}`, {
+        signal: controller.signal
+      })
+      clearTimeout(timeoutId)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log("Students data:", data)
         setStudents(data.data || [])
       } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error("API Error:", errorData)
         toast.error("Failed to load students")
       }
-    } catch (error) {
-      console.error("Error fetching students:", error)
-      toast.error("Failed to load students")
+    } catch (error: any) {
+      clearTimeout(timeoutId)
+      if (error.name === 'AbortError') {
+        console.error("Request timeout")
+        toast.error("Request timed out. Please try again.")
+      } else {
+        console.error("Error fetching students:", error)
+        toast.error("Failed to load students")
+      }
     } finally {
       setIsLoading(false)
     }

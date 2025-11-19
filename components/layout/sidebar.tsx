@@ -64,39 +64,23 @@ export function Sidebar({ userRole }: SidebarProps) {
           icon: LayoutDashboard,
         },
         {
-          label: "Announcements",
-          icon: Bell,
-          subItems: [
-            {
-              label: "View All",
-              href: `/dashboard/${userRole}/announcements`,
-              icon: Bell,
-            },
-            {
-              label: "Create New",
-              href: `/dashboard/${userRole}/announcements/create`,
-              icon: Bell,
-            },
-          ]
+          label: "Pending Approvals",
+          href: `/dashboard/${userRole}/pending-registrations`,
+          icon: ClipboardCheck,
         },
         {
-          label: "User Management",
+          label: "Announcements",
+          href: `/dashboard/${userRole}/announcements`,
+          icon: Bell,
+        },
+        {
+          label: "People",
           icon: Users,
           subItems: [
-            {
-              label: "All Users",
-              href: `/dashboard/${userRole}/users`,
-              icon: Users,
-            },
             {
               label: "Students",
               href: `/dashboard/${userRole}/students`,
               icon: GraduationCap,
-            },
-            {
-              label: "Parents",
-              href: `/dashboard/${userRole}/parents`,
-              icon: UserCircle2,
             },
             {
               label: "Teachers",
@@ -104,9 +88,9 @@ export function Sidebar({ userRole }: SidebarProps) {
               icon: Users,
             },
             {
-              label: "Pending Registrations",
-              href: `/dashboard/${userRole}/pending-registrations`,
-              icon: ClipboardCheck,
+              label: "Parents",
+              href: `/dashboard/${userRole}/parents`,
+              icon: UserCircle2,
             },
           ]
         },
@@ -125,9 +109,9 @@ export function Sidebar({ userRole }: SidebarProps) {
               icon: Clock,
             },
             {
-              label: "Calendar",
-              href: `/dashboard/${userRole}/academic-calendar`,
-              icon: CalendarDays,
+              label: "Homework",
+              href: `/dashboard/${userRole}/homework`,
+              icon: BookOpen,
             },
             {
               label: "Attendance",
@@ -135,9 +119,25 @@ export function Sidebar({ userRole }: SidebarProps) {
               icon: ClipboardCheck,
             },
             {
+              label: "Academic Calendar",
+              href: `/dashboard/${userRole}/academic-calendar`,
+              icon: CalendarDays,
+            },
+          ]
+        },
+        {
+          label: "Exams & Grades",
+          icon: FileCheck,
+          subItems: [
+            {
               label: "Exams",
               href: `/dashboard/${userRole}/exams`,
               icon: FileCheck,
+            },
+            {
+              label: "Report Cards",
+              href: `/dashboard/${userRole}/report-cards`,
+              icon: FileText,
             },
           ]
         },
@@ -155,6 +155,16 @@ export function Sidebar({ userRole }: SidebarProps) {
               href: `/dashboard/${userRole}/fee-management`,
               icon: DollarSign,
             },
+            {
+              label: "Income",
+              href: `/dashboard/${userRole}/finance/income`,
+              icon: DollarSign,
+            },
+            {
+              label: "Expenses",
+              href: `/dashboard/${userRole}/finance/expenses`,
+              icon: DollarSign,
+            },
           ]
         },
         {
@@ -167,22 +177,26 @@ export function Sidebar({ userRole }: SidebarProps) {
               icon: FileText,
             },
             {
-              label: "Report Cases",
-              href: `/dashboard/${userRole}/report-cases`,
-              icon: AlertTriangle,
+              label: "Academic Progress",
+              href: `/dashboard/${userRole}/reports/academic-progress`,
+              icon: BarChart3,
+            },
+            {
+              label: "Financial Reports",
+              href: `/dashboard/${userRole}/reports/financial`,
+              icon: DollarSign,
             },
           ]
         },
         {
+          label: "Report Cases",
+          href: `/dashboard/${userRole}/report-cases`,
+          icon: AlertTriangle,
+        },
+        {
           label: "Settings",
+          href: `/dashboard/${userRole}/settings`,
           icon: Settings,
-          subItems: [
-            {
-              label: "General",
-              href: `/dashboard/${userRole}/settings`,
-              icon: Settings,
-            },
-          ]
         },
       ]
     } else if (userRole === "teacher") {
@@ -194,54 +208,35 @@ export function Sidebar({ userRole }: SidebarProps) {
         },
         {
           label: "Announcements",
+          href: `/dashboard/${userRole}/announcements`,
           icon: Bell,
-          subItems: [
-            {
-              label: "View All",
-              href: `/dashboard/${userRole}/announcements`,
-              icon: Bell,
-            },
-          ]
         },
         {
           label: "My Classes",
+          href: `/dashboard/${userRole}/classes`,
           icon: BookOpen,
-          subItems: [
-            {
-              label: "View Classes",
-              href: `/dashboard/${userRole}/classes`,
-              icon: BookOpen,
-            },
-          ]
         },
         {
           label: "My Students",
+          href: `/dashboard/${userRole}/students`,
           icon: GraduationCap,
-          subItems: [
-            {
-              label: "View Students",
-              href: `/dashboard/${userRole}/students`,
-              icon: GraduationCap,
-            },
-          ]
         },
         {
-          label: "Attendance",
-          icon: Calendar,
+          label: "Teaching",
+          icon: ClipboardCheck,
           subItems: [
             {
-              label: "Mark Attendance",
+              label: "Attendance",
               href: `/dashboard/${userRole}/attendance`,
               icon: Calendar,
             },
-          ]
-        },
-        {
-          label: "Grades",
-          icon: BarChart3,
-          subItems: [
             {
-              label: "Manage Grades",
+              label: "Homework",
+              href: `/dashboard/${userRole}/homework`,
+              icon: BookOpen,
+            },
+            {
+              label: "Grades",
               href: `/dashboard/${userRole}/grades`,
               icon: BarChart3,
             },
@@ -253,37 +248,19 @@ export function Sidebar({ userRole }: SidebarProps) {
           ]
         },
         {
-          label: "Homework",
-          icon: BookOpen,
-          subItems: [
-            {
-              label: "View Homework",
-              href: `/dashboard/${userRole}/homework`,
-              icon: BookOpen,
-            },
-          ]
-        },
-        {
-          label: "Timetable",
+          label: "My Schedule",
+          href: `/dashboard/${userRole}/timetable`,
           icon: Clock,
-          subItems: [
-            {
-              label: "My Schedule",
-              href: `/dashboard/${userRole}/timetable`,
-              icon: Clock,
-            },
-          ]
         },
         {
-          label: "Report Issue",
+          label: "Report Cases",
+          href: `/dashboard/${userRole}/report-cases`,
           icon: AlertTriangle,
-          subItems: [
-            {
-              label: "View Cases",
-              href: `/dashboard/${userRole}/report-cases`,
-              icon: AlertTriangle,
-            },
-          ]
+        },
+        {
+          label: "Settings",
+          href: `/dashboard/${userRole}/settings`,
+          icon: Settings,
         },
       ]
     } else if (userRole === "student") {
@@ -295,69 +272,44 @@ export function Sidebar({ userRole }: SidebarProps) {
         },
         {
           label: "Announcements",
+          href: `/dashboard/${userRole}/announcements`,
           icon: Bell,
-          subItems: [
-            {
-              label: "View All",
-              href: `/dashboard/${userRole}/announcements`,
-              icon: Bell,
-            },
-          ]
         },
         {
-          label: "My Grades",
-          icon: BarChart3,
-          subItems: [
-            {
-              label: "View Grades",
-              href: `/dashboard/${userRole}/grades`,
-              icon: BarChart3,
-            },
-          ]
-        },
-        {
-          label: "Attendance",
-          icon: Calendar,
-          subItems: [
-            {
-              label: "View Attendance",
-              href: `/dashboard/${userRole}/attendance`,
-              icon: Calendar,
-            },
-          ]
-        },
-        {
-          label: "Homework",
+          label: "My Learning",
           icon: BookOpen,
           subItems: [
             {
-              label: "View Homework",
+              label: "Homework",
               href: `/dashboard/${userRole}/homework`,
               icon: BookOpen,
             },
-          ]
-        },
-        {
-          label: "Timetable",
-          icon: Calendar,
-          subItems: [
             {
-              label: "View Timetable",
-              href: `/dashboard/${userRole}/timetable`,
+              label: "Grades",
+              href: `/dashboard/${userRole}/grades`,
+              icon: BarChart3,
+            },
+            {
+              label: "Attendance",
+              href: `/dashboard/${userRole}/attendance`,
               icon: Calendar,
             },
+            {
+              label: "Timetable",
+              href: `/dashboard/${userRole}/timetable`,
+              icon: Clock,
+            },
           ]
         },
         {
-          label: "Report Issue",
+          label: "Report Cases",
+          href: `/dashboard/${userRole}/report-cases`,
           icon: AlertTriangle,
-          subItems: [
-            {
-              label: "View Cases",
-              href: `/dashboard/${userRole}/report-cases`,
-              icon: AlertTriangle,
-            },
-          ]
+        },
+        {
+          label: "Settings",
+          href: `/dashboard/${userRole}/settings`,
+          icon: Settings,
         },
       ]
     } else {
@@ -370,63 +322,49 @@ export function Sidebar({ userRole }: SidebarProps) {
         },
         {
           label: "Announcements",
+          href: `/dashboard/${userRole}/announcements`,
           icon: Bell,
-          subItems: [
-            {
-              label: "View All",
-              href: `/dashboard/${userRole}/announcements`,
-              icon: Bell,
-            },
-          ]
         },
         {
-          label: "Performance",
+          label: "Child's Progress",
           icon: BarChart3,
           subItems: [
             {
-              label: "View Performance",
+              label: "Performance",
               href: `/dashboard/${userRole}/performance`,
               icon: BarChart3,
             },
             {
               label: "Student Report",
               href: `/dashboard/${userRole}/student-report`,
-              icon: BarChart3,
+              icon: FileText,
             },
-          ]
-        },
-        {
-          label: "Attendance",
-          icon: Calendar,
-          subItems: [
             {
-              label: "View Attendance",
+              label: "Attendance",
               href: `/dashboard/${userRole}/attendance`,
               icon: Calendar,
             },
-          ]
-        },
-        {
-          label: "Homework",
-          icon: BookOpen,
-          subItems: [
             {
-              label: "View Homework",
+              label: "Homework",
               href: `/dashboard/${userRole}/homework`,
               icon: BookOpen,
             },
           ]
         },
         {
-          label: "Report Issue",
+          label: "Fee Status",
+          href: `/dashboard/${userRole}/fee-status`,
+          icon: DollarSign,
+        },
+        {
+          label: "Report Cases",
+          href: `/dashboard/${userRole}/report-cases`,
           icon: AlertTriangle,
-          subItems: [
-            {
-              label: "View Cases",
-              href: `/dashboard/${userRole}/report-cases`,
-              icon: AlertTriangle,
-            },
-          ]
+        },
+        {
+          label: "Settings",
+          href: `/dashboard/${userRole}/settings`,
+          icon: Settings,
         },
       ]
     }
@@ -455,24 +393,24 @@ export function Sidebar({ userRole }: SidebarProps) {
 
     if (hasSubItems) {
       return (
-        <div key={item.label}>
+        <div key={item.label} className="mb-1">
           <button
             onClick={() => toggleMenu(item.label)}
-            className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+            className={`w-full flex items-center justify-between gap-3 px-5 py-4 rounded-xl transition-all duration-200 ${
               hasActiveSubItem
-                ? "bg-white/10 text-white font-medium"
+                ? "bg-white/15 text-white font-semibold shadow-md"
                 : "text-white/90 hover:bg-white/20 hover:text-white hover:shadow-md"
             }`}
           >
             <div className="flex items-center gap-3">
-              <Icon size={20} />
-              <span>{item.label}</span>
+              <Icon size={22} />
+              <span className="font-semibold text-base">{item.label}</span>
             </div>
-            {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+            {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
           </button>
           
           {isExpanded && (
-            <div className="ml-4 mt-1 space-y-1">
+            <div className="ml-4 mt-2 space-y-2 pb-2">
               {item.subItems?.map((subItem) => {
                 const SubIcon = subItem.icon
                 const isSubActive = pathname === subItem.href
@@ -482,14 +420,14 @@ export function Sidebar({ userRole }: SidebarProps) {
                     key={subItem.href}
                     href={subItem.href!}
                     onClick={closeMobileMenu}
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    className={`flex items-center gap-3 px-5 py-3 rounded-lg transition-all duration-200 ${
                       isSubActive
-                        ? "bg-white/10 text-white font-medium"
+                        ? "bg-white/15 text-white font-medium shadow-sm"
                         : "text-white/80 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    <SubIcon size={18} />
-                    <span className="text-sm">{subItem.label}</span>
+                    <SubIcon size={20} />
+                    <span className="text-base font-medium">{subItem.label}</span>
                   </Link>
                 )
               })}
@@ -504,16 +442,16 @@ export function Sidebar({ userRole }: SidebarProps) {
         key={item.href}
         href={item.href!}
         onClick={closeMobileMenu}
-        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+        className={`flex items-center gap-3 px-5 py-4 rounded-xl transition-all duration-200 mb-1 ${
           isActive && isOverview
             ? "bg-secondary text-foreground font-semibold shadow-lg transform scale-105"
             : isActive
-            ? "bg-white/10 text-white font-medium"
+            ? "bg-white/15 text-white font-semibold shadow-md"
             : "text-white/90 hover:bg-white/20 hover:text-white hover:shadow-md hover:translate-x-1"
         }`}
       >
-        <Icon size={20} className="transition-transform duration-200 group-hover:scale-110" />
-        <span>{item.label}</span>
+        <Icon size={22} className="transition-transform duration-200 group-hover:scale-110" />
+        <span className="font-semibold text-base">{item.label}</span>
       </Link>
     )
   }
@@ -555,17 +493,27 @@ export function Sidebar({ userRole }: SidebarProps) {
 
         {/* Logo & Title */}
         <div className="p-6">
-          <h1 className="font-bold text-white text-2xl mb-1">SAR School</h1>
-          <p className="text-white/80 text-sm">{getRoleLabel()}</p>
+          <h1 className="font-bold text-white text-3xl mb-2">SAR School</h1>
+          <p className="text-white/90 text-base font-medium">{getRoleLabel()}</p>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {menuItems.map((item, index) => (
-            <div key={item.label || index} onClick={item.href ? closeMobileMenu : undefined}>
-              {renderMenuItem(item, index)}
-            </div>
-          ))}
+        <nav className="flex-1 px-3 py-4 space-y-2 overflow-y-auto">
+          {menuItems.map((item, index) => {
+            // Add separator after Dashboard and before last 2 items (Report Cases & Settings)
+            const showSeparatorAfter = index === 0 || index === menuItems.length - 3
+            
+            return (
+              <div key={item.label || index}>
+                <div onClick={item.href ? closeMobileMenu : undefined}>
+                  {renderMenuItem(item, index)}
+                </div>
+                {showSeparatorAfter && (
+                  <div className="my-3 border-t border-white/10"></div>
+                )}
+              </div>
+            )
+          })}
         </nav>
 
         {/* User Profile & Logout */}
@@ -575,10 +523,10 @@ export function Sidebar({ userRole }: SidebarProps) {
               localStorage.removeItem("user")
               window.location.href = "/"
             }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/90 hover:bg-red-500/20 hover:text-white hover:shadow-md hover:translate-x-1 transition-all duration-200"
+            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-white/90 hover:bg-red-500/20 hover:text-white hover:shadow-md hover:translate-x-1 transition-all duration-200"
           >
-            <LogOut size={20} />
-            <span>Logout</span>
+            <LogOut size={22} />
+            <span className="font-semibold text-base">Logout</span>
           </button>
         </div>
       </aside>

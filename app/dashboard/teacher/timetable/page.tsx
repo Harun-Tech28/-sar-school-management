@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
 import { Card } from "@/components/ui/card"
@@ -46,37 +46,60 @@ export default function TeacherTimetablePage() {
     setUserName(user.fullName || user.email.split("@")[0])
     setUserId(user.id || user.email)
     
-    // Get teacher ID
-    if (user.teacherId) {
-      setTeacherId(user.teacherId)
+    // Get teacher ID - try multiple possible locations
+    const tid = user.teacherId || user.id
+    console.log("Teacher ID:", tid, "User:", user)
+    if (tid) {
+      setTeacherId(tid)
+    } else {
+      setIsLoading(false)
+      toast.error("Teacher ID not found. Please contact administrator.")
     }
   }, [])
 
-  const fetchTimetable = useCallback(async () => {
-    if (!teacherId) return
-    
-    setIsLoading(true)
-    try {
-      const response = await fetch(`/api/timetable/teacher/${teacherId}`)
-      if (response.ok) {
-        const data = await response.json()
-        setTimetable(data.data || [])
-      } else {
-        toast.error("Failed to load timetable")
-      }
-    } catch (error) {
-      console.error("Error fetching timetable:", error)
-      toast.error("Failed to load timetable")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [teacherId])
-
   useEffect(() => {
+    const fetchTimetable = async () => {
+      if (!teacherId) {
+        setIsLoading(false)
+        return
+      }
+      
+      setIsLoading(true)
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+      
+      try {
+        const response = await fetch(`/api/timetable/teacher/${teacherId}`, {
+          signal: controller.signal
+        })
+        clearTimeout(timeoutId)
+        
+        if (response.ok) {
+          const data = await response.json()
+          setTimetable(data.data || [])
+        } else {
+          const errorData = await response.json().catch(() => ({}))
+          console.error("API Error:", errorData)
+          toast.error("Failed to load timetable")
+        }
+      } catch (error: any) {
+        clearTimeout(timeoutId)
+        if (error.name === 'AbortError') {
+          console.error("Request timeout")
+          toast.error("Request timed out. Please try again.")
+        } else {
+          console.error("Error fetching timetable:", error)
+          toast.error("Failed to load timetable")
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     if (teacherId) {
       fetchTimetable()
     }
-  }, [teacherId, fetchTimetable])
+  }, [teacherId])
 
   const getTimetableForDay = (day: string) => {
     return timetable

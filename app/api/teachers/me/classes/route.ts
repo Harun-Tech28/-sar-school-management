@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma"
 
 // GET /api/teachers/me/classes - Get classes for the logged-in teacher
 export async function GET(request: NextRequest) {
+  const startTime = Date.now()
+  
   try {
-    // Get user from session/localStorage (you'll need to implement proper auth)
-    // For now, we'll get it from the request headers or query params
     const teacherId = request.nextUrl.searchParams.get("teacherId")
     
     if (!teacherId) {
@@ -15,20 +15,25 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    await prisma.$connect()
+    console.log(`[teachers/me/classes] Fetching classes for teacher: ${teacherId}`)
 
-    // Get teacher's classes where they are the primary teacher
+    // Simplified query - removed unnecessary includes
     const classes = await prisma.class.findMany({
       where: {
         teacherId: teacherId,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        form: true,
+        room: true,
+        capacity: true,
+        teacherId: true,
         teacher: {
-          include: {
+          select: {
             user: {
               select: {
                 fullName: true,
-                email: true,
               },
             },
           },
@@ -44,7 +49,6 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // Format response
     const formattedClasses = classes.map((cls) => ({
       id: cls.id,
       name: cls.name,
@@ -54,9 +58,10 @@ export async function GET(request: NextRequest) {
       studentCount: cls._count.students,
       room: cls.room,
       capacity: cls.capacity,
-      createdAt: cls.createdAt,
-      updatedAt: cls.updatedAt,
     }))
+
+    const duration = Date.now() - startTime
+    console.log(`[teachers/me/classes] Query completed in ${duration}ms, found ${formattedClasses.length} classes`)
 
     return NextResponse.json({
       success: true,
@@ -64,7 +69,8 @@ export async function GET(request: NextRequest) {
       total: formattedClasses.length,
     })
   } catch (error) {
-    console.error("[teachers/me/classes] GET error:", error)
+    const duration = Date.now() - startTime
+    console.error(`[teachers/me/classes] GET error after ${duration}ms:`, error)
     return NextResponse.json(
       { success: false, error: "Failed to fetch teacher's classes" },
       { status: 500 }

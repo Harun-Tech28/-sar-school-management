@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card } from "@/components/ui/card"
-import { Users, BookOpen, MapPin, TrendingUp } from "lucide-react"
+import { Users, BookOpen, MapPin } from "lucide-react"
 import { toast } from "react-hot-toast"
 
 interface Class {
@@ -21,37 +21,75 @@ export default function TeacherClassesPage() {
   const router = useRouter()
   const [classes, setClasses] = useState<Class[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [teacherId, setTeacherId] = useState("")
+  const [isMounted, setIsMounted] = useState(false)
+  const [error, setError] = useState("")
 
   useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
+    
     const user = JSON.parse(localStorage.getItem("user") || "{}")
     if (!user.email) {
       window.location.href = "/auth/login"
       return
     }
     
-    // Get teacher ID from user
-    const userId = user.id
-    fetchTeacherId(userId)
-  }, [])
+    // Set timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      setIsLoading(false)
+      setError("Request timed out. Please refresh the page.")
+      toast.error("Loading took too long. Please try again.")
+    }, 10000) // 10 second timeout
 
-  const fetchTeacherId = async (userId: string) => {
+    // Try to get teacherId from localStorage first
+    const tId = user.teacherId || localStorage.getItem("teacherId")
+    
+    if (tId) {
+      // If we have teacherId, fetch classes directly
+      fetchClasses(tId)
+    } else {
+      // Otherwise, fetch teacher profile first
+      fetchTeacherId(user.id, timeout)
+    }
+
+    return () => clearTimeout(timeout)
+  }, [isMounted])
+
+  const fetchTeacherId = async (userId: string, timeout: NodeJS.Timeout) => {
     try {
       const response = await fetch(`/api/teachers?userId=${userId}`)
       if (response.ok) {
         const data = await response.json()
         if (data.teachers && data.teachers.length > 0) {
           const tId = data.teachers[0].id
-          setTeacherId(tId)
+          // Store teacherId for future use
+          localStorage.setItem("teacherId", tId)
+          
+          // Update user object with teacherId
+          const user = JSON.parse(localStorage.getItem("user") || "{}")
+          user.teacherId = tId
+          localStorage.setItem("user", JSON.stringify(user))
+          
           fetchClasses(tId)
         } else {
+          setError("Teacher profile not found")
           toast.error("Teacher profile not found")
           setIsLoading(false)
         }
+      } else {
+        setError("Failed to load teacher profile")
+        setIsLoading(false)
       }
+      clearTimeout(timeout)
     } catch (error) {
       console.error("Error fetching teacher ID:", error)
+      setError("Network error. Please check your connection.")
+      toast.error("Failed to load teacher profile")
       setIsLoading(false)
+      clearTimeout(timeout)
     }
   }
 
@@ -61,22 +99,26 @@ export default function TeacherClassesPage() {
       if (response.ok) {
         const data = await response.json()
         setClasses(data.data || [])
+        setError("")
       } else {
+        setError("Failed to load classes")
         toast.error("Failed to load your classes")
       }
     } catch (error) {
       console.error("Error fetching classes:", error)
+      setError("Network error. Please check your connection.")
       toast.error("Failed to load your classes")
     } finally {
       setIsLoading(false)
     }
   }
 
-  if (isLoading) {
+  if (!isMounted || isLoading) {
     return (
       <div className="p-6">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#E31E24] border-t-transparent"></div>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#E31E24] border-t-transparent mb-4"></div>
+          <p className="text-gray-600">Loading your classes...</p>
         </div>
       </div>
     )
@@ -90,11 +132,31 @@ export default function TeacherClassesPage() {
           My Classes
         </h1>
         <p className="text-gray-600 mt-2">
-          View all classes in the school
+          View all classes assigned to you
         </p>
       </div>
 
-      {classes.length === 0 ? (
+      {error && (
+        <Card className="p-6 mb-6 bg-red-50 border-red-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+              <span className="text-red-600 text-xl">⚠</span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-red-900">Error Loading Classes</h3>
+              <p className="text-sm text-red-700">{error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+              >
+                Click here to retry
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      {!error && classes.length === 0 ? (
         <Card className="p-12 text-center">
           <BookOpen className="mx-auto text-gray-400 mb-4" size={64} />
           <h3 className="text-xl font-semibold text-gray-600 mb-2">

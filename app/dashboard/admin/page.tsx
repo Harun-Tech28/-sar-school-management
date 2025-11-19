@@ -268,391 +268,288 @@ export default function AdminDashboard() {
     <div className="flex bg-gray-50 min-h-screen">
       <Sidebar userRole="admin" />
       <div className="flex-1 flex flex-col">
-        <main className="flex-1 p-8 overflow-auto">
+        <main className="flex-1 p-6 overflow-auto">
           <div className="max-w-7xl mx-auto">
-            {/* Gradient Header */}
-            <div className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-400 rounded-3xl p-8 mb-8 shadow-xl relative">
-              <div className="absolute top-6 right-6">
+            {/* Simple Header */}
+            <div className="bg-gradient-to-r from-[#E31E24] to-[#C41E3A] rounded-2xl p-6 mb-6 shadow-lg relative">
+              <div className="absolute top-4 right-4">
                 <NotificationBell userId={userId} userRole="admin" />
               </div>
-              <h1 className="text-4xl font-bold text-white mb-2">
-                Welcome back, <span className="text-yellow-200">Administrator</span>
+              <h1 className="text-3xl font-bold text-white mb-1">
+                Welcome back, Administrator
               </h1>
-              <p className="text-white/90 text-lg">Here's what's happening in your school today ✨</p>
+              <p className="text-white/90">Here's your school overview</p>
             </div>
 
-            {/* Enhanced Stats Cards */}
+            {/* Simple Stats Cards */}
             {loading ? (
-              <StatCardsGridSkeleton count={4} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="bg-white rounded-xl p-6 shadow-sm animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <DashboardGrid columns={4} gap={6} className="mb-8">
-                <EnhancedStatCard
-                  title="Total Students"
-                  value={counts.students}
-                  icon={<GraduationCap size={24} />}
-                  gradient="blue"
-                  trend={{ value: 12, isPositive: true }}
-                  onClick={() => router.push('/dashboard/admin/students')}
-                />
-                
-                <EnhancedStatCard
-                  title="Total Teachers"
-                  value={counts.teachers}
-                  icon={<Users size={24} />}
-                  gradient="green"
-                  trend={{ value: 5, isPositive: true }}
-                  onClick={() => router.push('/dashboard/admin/teachers')}
-                />
-                
-                <EnhancedStatCard
-                  title="Total Parents"
-                  value={counts.parents}
-                  icon={<UserCheck size={24} />}
-                  gradient="purple"
-                  trend={{ value: 8, isPositive: true }}
-                  onClick={() => router.push('/dashboard/admin/parents')}
-                />
-                
-                <EnhancedStatCard
-                  title="Pending Registrations"
-                  value={pendingCount}
-                  icon={<AlertTriangle size={24} />}
-                  gradient="orange"
-                  onClick={() => router.push('/dashboard/admin/pending-registrations')}
-                />
-              </DashboardGrid>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <Link href="/dashboard/admin/students">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm text-white/90 font-medium">Students</p>
+                      <div className="bg-white/20 p-2 rounded-lg">
+                        <GraduationCap className="text-white" size={24} />
+                      </div>
+                    </div>
+                    <p className="text-4xl font-bold text-white">{counts.students}</p>
+                    <p className="text-xs text-white/80 mt-2">Total enrolled</p>
+                  </div>
+                </Link>
+
+                <Link href="/dashboard/admin/teachers">
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm text-white/90 font-medium">Teachers</p>
+                      <div className="bg-white/20 p-2 rounded-lg">
+                        <Users className="text-white" size={24} />
+                      </div>
+                    </div>
+                    <p className="text-4xl font-bold text-white">{counts.teachers}</p>
+                    <p className="text-xs text-white/80 mt-2">Active staff</p>
+                  </div>
+                </Link>
+
+                <Link href="/dashboard/admin/parents">
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm text-white/90 font-medium">Parents</p>
+                      <div className="bg-white/20 p-2 rounded-lg">
+                        <UserCheck className="text-white" size={24} />
+                      </div>
+                    </div>
+                    <p className="text-4xl font-bold text-white">{counts.parents}</p>
+                    <p className="text-xs text-white/80 mt-2">Registered</p>
+                  </div>
+                </Link>
+
+                <Link href="/dashboard/admin/classes">
+                  <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-sm text-white/90 font-medium">Classes</p>
+                      <div className="bg-white/20 p-2 rounded-lg">
+                        <BookOpen className="text-white" size={24} />
+                      </div>
+                    </div>
+                    <p className="text-4xl font-bold text-white">{counts.classes}</p>
+                    <p className="text-xs text-white/80 mt-2">Active classes</p>
+                  </div>
+                </Link>
+              </div>
             )}
 
             {/* Quick Actions */}
-            <QuickActions
-              title="Quick Actions"
-              columns={4}
-              className="mb-8"
-              actions={[
-                {
-                  label: "Add Student",
-                  icon: <UserPlus size={20} />,
-                  onClick: () => router.push('/dashboard/admin/students/add'),
-                  color: 'primary'
-                },
-                {
-                  label: "Add Teacher",
-                  icon: <GraduationCap size={20} />,
-                  onClick: () => router.push('/dashboard/admin/teachers/add'),
-                  color: 'success'
-                },
-                {
-                  label: "Create Class",
-                  icon: <School size={20} />,
-                  onClick: () => router.push('/dashboard/admin/classes/add'),
-                  color: 'info'
-                },
-                {
-                  label: "View Reports",
-                  icon: <BarChart3 size={20} />,
-                  onClick: () => router.push('/dashboard/admin/reports'),
-                  color: 'secondary'
-                }
-              ]}
-            />
+            <div className="bg-white rounded-xl p-6 shadow-md mb-6 border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="text-2xl">⚡</span>
+                Quick Actions
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <button
+                  onClick={() => router.push('/dashboard/admin/students/add')}
+                  className="flex flex-col items-center justify-center p-5 bg-gradient-to-br from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-xl transition-all transform hover:scale-105 border border-blue-200"
+                >
+                  <div className="bg-blue-500 p-3 rounded-full mb-2">
+                    <UserPlus className="text-white" size={20} />
+                  </div>
+                  <span className="text-sm font-semibold text-blue-900">Add Student</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/dashboard/admin/teachers/add')}
+                  className="flex flex-col items-center justify-center p-5 bg-gradient-to-br from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-xl transition-all transform hover:scale-105 border border-green-200"
+                >
+                  <div className="bg-green-500 p-3 rounded-full mb-2">
+                    <GraduationCap className="text-white" size={20} />
+                  </div>
+                  <span className="text-sm font-semibold text-green-900">Add Teacher</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/dashboard/admin/classes/add')}
+                  className="flex flex-col items-center justify-center p-5 bg-gradient-to-br from-purple-50 to-purple-100 hover:from-purple-100 hover:to-purple-200 rounded-xl transition-all transform hover:scale-105 border border-purple-200"
+                >
+                  <div className="bg-purple-500 p-3 rounded-full mb-2">
+                    <School className="text-white" size={20} />
+                  </div>
+                  <span className="text-sm font-semibold text-purple-900">Create Class</span>
+                </button>
+
+                <button
+                  onClick={() => router.push('/dashboard/admin/announcements/create')}
+                  className="flex flex-col items-center justify-center p-5 bg-gradient-to-br from-orange-50 to-orange-100 hover:from-orange-100 hover:to-orange-200 rounded-xl transition-all transform hover:scale-105 border border-orange-200"
+                >
+                  <div className="bg-orange-500 p-3 rounded-full mb-2">
+                    <Bell className="text-white" size={20} />
+                  </div>
+                  <span className="text-sm font-semibold text-orange-900">Announcement</span>
+                </button>
+              </div>
+            </div>
 
             {/* Pending Registrations Alert */}
             {pendingCount > 0 && (
               <Link href="/dashboard/admin/pending-registrations">
-                <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all mb-8 cursor-pointer group">
+                <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-xl p-5 shadow-md hover:shadow-lg transition-all mb-6 cursor-pointer">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="bg-white/20 backdrop-blur-sm p-4 rounded-xl group-hover:scale-110 transition-transform">
-                        <span className="text-4xl">⏳</span>
-                      </div>
+                    <div className="flex items-center gap-3">
+                      <AlertTriangle className="text-white" size={32} />
                       <div>
-                        <h3 className="text-2xl font-bold text-white mb-1">
+                        <h3 className="text-xl font-bold text-white">
                           {pendingCount} Pending Registration{pendingCount !== 1 ? 's' : ''}
                         </h3>
-                        <p className="text-white/90">
-                          {pendingCount === 1 ? 'A new user is' : 'New users are'} waiting for your approval
-                        </p>
+                        <p className="text-white/90 text-sm">Click to review and approve</p>
                       </div>
                     </div>
-                    <div className="hidden md:flex items-center gap-2 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl group-hover:bg-white/30 transition-all">
-                      <span className="text-white font-semibold">Review Now</span>
-                      <svg className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                    <div className="hidden md:block bg-white/20 px-4 py-2 rounded-lg">
+                      <span className="text-white font-medium text-sm">Review →</span>
                     </div>
                   </div>
-                  
-                  {/* Preview of pending users */}
-                  {pendingUsers.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-white/20">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        {pendingUsers.map((user, index) => (
-                          <div key={user.id} className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2">
-                            <span className="text-white/90 text-sm font-medium">{user.fullName}</span>
-                            <span className="text-white/70 text-xs">({user.role})</span>
-                          </div>
-                        ))}
-                        {pendingCount > 3 && (
-                          <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg">
-                            <span className="text-white/90 text-sm font-medium">+{pendingCount - 3} more</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </Link>
             )}
 
-            {/* Overview Chart */}
-            <div className="bg-white rounded-2xl p-8 shadow-md border border-gray-100 mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">School Overview</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* User Distribution Chart */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">User Distribution</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
-                          Students
-                        </span>
-                        <span className="text-sm font-bold text-gray-800">{counts.students}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div 
-                          className="bg-blue-500 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${(counts.students / (counts.students + counts.teachers + counts.parents + 1)) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-                          Teachers
-                        </span>
-                        <span className="text-sm font-bold text-gray-800">{counts.teachers}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div 
-                          className="bg-green-500 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${(counts.teachers / (counts.students + counts.teachers + counts.parents + 1)) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                          <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
-                          Parents
-                        </span>
-                        <span className="text-sm font-bold text-gray-800">{counts.parents}</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div 
-                          className="bg-purple-500 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${(counts.parents / (counts.students + counts.teachers + counts.parents + 1)) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </div>
+            {/* Quick Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-5 shadow-md border border-cyan-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">👥</span>
+                  <p className="text-sm text-cyan-700 font-medium">Student-Teacher Ratio</p>
                 </div>
+                <p className="text-3xl font-bold text-cyan-900">
+                  {counts.teachers > 0 ? Math.round(counts.students / counts.teachers) : 0}:1
+                </p>
+              </div>
 
-                {/* Quick Stats */}
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-700 mb-4">Quick Stats</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                      <p className="text-xs text-blue-600 font-semibold mb-1">Student-Teacher Ratio</p>
-                      <p className="text-3xl font-bold text-blue-700">
-                        {counts.teachers > 0 ? Math.round(counts.students / counts.teachers) : 0}:1
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                      <p className="text-xs text-green-600 font-semibold mb-1">Avg Class Size</p>
-                      <p className="text-3xl font-bold text-green-700">
-                        {counts.classes > 0 ? Math.round(counts.students / counts.classes) : 0}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                      <p className="text-xs text-purple-600 font-semibold mb-1">Total Users</p>
-                      <p className="text-3xl font-bold text-purple-700">
-                        {counts.students + counts.teachers + counts.parents}
-                      </p>
-                    </div>
-                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 border border-yellow-200">
-                      <p className="text-xs text-yellow-600 font-semibold mb-1">Active Classes</p>
-                      <p className="text-3xl font-bold text-yellow-700">{counts.classes}</p>
-                    </div>
-                  </div>
+              <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-5 shadow-md border border-pink-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">📚</span>
+                  <p className="text-sm text-pink-700 font-medium">Avg Class Size</p>
                 </div>
+                <p className="text-3xl font-bold text-pink-900">
+                  {counts.classes > 0 ? Math.round(counts.students / counts.classes) : 0}
+                </p>
               </div>
-            </div>
 
-            {/* Dashboard Grid with Overview and Activity Feed */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              {/* Overview Stats - 2 columns */}
-              <div className="lg:col-span-2">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Overview</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <EnhancedCard className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900">Active Classes</h3>
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <BookOpen className="w-5 h-5 text-blue-600" />
-                      </div>
-                    </div>
-                    <AnimatedNumber value={counts.classes} className="text-3xl font-bold text-gray-900" />
-                    <p className="text-sm text-gray-600 mt-2">Currently running</p>
-                    <ProgressBar value={75} className="mt-3" color="blue" />
-                  </EnhancedCard>
-
-                  <EnhancedCard className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900">Student-Teacher Ratio</h3>
-                      <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <Users className="w-5 h-5 text-green-600" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-gray-900">
-                      {counts.teachers > 0 ? Math.round(counts.students / counts.teachers) : 0}:1
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2">Students per teacher</p>
-                    <ProgressBar value={60} className="mt-3" color="green" />
-                  </EnhancedCard>
-
-                  <EnhancedCard className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900">Financial Net</h3>
-                      <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <DollarSign className="w-5 h-5 text-yellow-600" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-green-600">
-                      GH₵ <AnimatedNumber value={analytics.financialNet} />
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2">This month</p>
-                    <ProgressBar value={85} className="mt-3" color="yellow" />
-                  </EnhancedCard>
-
-                  <EnhancedCard className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-semibold text-gray-900">Performance Average</h3>
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-purple-600" />
-                      </div>
-                    </div>
-                    <div className="text-3xl font-bold text-purple-600">
-                      {analytics.performanceAverage > 0 ? `${analytics.performanceAverage.toFixed(1)}%` : '0%'}
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2">School-wide average</p>
-                    <ProgressBar value={analytics.performanceAverage} className="mt-3" color="purple" />
-                  </EnhancedCard>
+              <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-5 shadow-md border border-indigo-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">🌐</span>
+                  <p className="text-sm text-indigo-700 font-medium">Total Users</p>
                 </div>
+                <p className="text-3xl font-bold text-indigo-900">
+                  {counts.students + counts.teachers + counts.parents}
+                </p>
               </div>
 
-              {/* Activity Feed - 1 column */}
-              <div>
-                <ActivityFeed
-                  activities={activities}
-                  title="Recent Activities"
-                  emptyMessage="No recent activities to show"
-                />
-              </div>
-            </div>
-
-            {/* Analytics & Reports */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Analytics & Reports</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Link href="/dashboard/admin/financial-reports">
-                  <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100 cursor-pointer group">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-green-100 p-4 rounded-xl group-hover:scale-110 transition-transform">
-                        <span className="text-4xl">💰</span>
-                      </div>
-                      <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                        Financial
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Financial Reports</h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Track income, expenses, and financial health
-                    </p>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-green-600 font-semibold">
-                        ₵{analytics.financialNet.toLocaleString()} Net
-                      </span>
-                      <span className="text-gray-500">This month</span>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/admin/performance-analysis">
-                  <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100 cursor-pointer group">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-blue-100 p-4 rounded-xl group-hover:scale-110 transition-transform">
-                        <span className="text-4xl">📊</span>
-                      </div>
-                      <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                        Academic
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">Performance Analysis</h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Student rankings, grades, and trends
-                    </p>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-blue-600 font-semibold">
-                        {analytics.performanceAverage > 0 ? `${analytics.performanceAverage.toFixed(1)}% Average` : 'No data'}
-                      </span>
-                      <span className="text-gray-500">School-wide</span>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/admin/reports">
-                  <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all hover-lift border border-gray-100 cursor-pointer group">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="bg-purple-100 p-4 rounded-xl group-hover:scale-110 transition-transform">
-                        <span className="text-4xl">📄</span>
-                      </div>
-                      <span className="text-xs font-semibold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
-                        Reports
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-2">All Reports</h3>
-                    <p className="text-gray-600 text-sm mb-4">
-                      Generate and download comprehensive reports
-                    </p>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-purple-600 font-semibold">
-                        {analytics.recentReports} Recent
-                      </span>
-                      <span className="text-gray-500">Available</span>
-                    </div>
-                  </div>
-                </Link>
+              <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-5 shadow-md border border-emerald-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">📈</span>
+                  <p className="text-sm text-emerald-700 font-medium">Performance Avg</p>
+                </div>
+                <p className="text-3xl font-bold text-emerald-900">
+                  {analytics.performanceAverage > 0 ? `${analytics.performanceAverage.toFixed(1)}%` : '0%'}
+                </p>
               </div>
             </div>
 
-            {/* Activity Timeline */}
-            <div className="mb-8">
-              <ActivityTimeline
-                activities={timelineActivities}
-                maxItems={5}
-                loading={loading}
-                showViewAll={true}
-                onViewAll={() => router.push('/dashboard/admin/activities')}
-              />
+            {/* Management Links */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <Link href="/dashboard/admin/finance">
+                <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-lg">
+                      <DollarSign className="text-white" size={28} />
+                    </div>
+                    <h3 className="font-bold text-white text-lg">Finance</h3>
+                  </div>
+                  <p className="text-sm text-white/90">Manage income, expenses & budgets</p>
+                  <div className="mt-3 text-xs text-white/80">→ View Details</div>
+                </div>
+              </Link>
+
+              <Link href="/dashboard/admin/attendance">
+                <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-lg">
+                      <UserCheck className="text-white" size={28} />
+                    </div>
+                    <h3 className="font-bold text-white text-lg">Attendance</h3>
+                  </div>
+                  <p className="text-sm text-white/90">Track student & teacher attendance</p>
+                  <div className="mt-3 text-xs text-white/80">→ View Details</div>
+                </div>
+              </Link>
+
+              <Link href="/dashboard/admin/reports">
+                <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:scale-105">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-white/20 p-2 rounded-lg">
+                      <BarChart3 className="text-white" size={28} />
+                    </div>
+                    <h3 className="font-bold text-white text-lg">Reports</h3>
+                  </div>
+                  <p className="text-sm text-white/90">View analytics & generate reports</p>
+                  <div className="mt-3 text-xs text-white/80">→ View Details</div>
+                </div>
+              </Link>
             </div>
 
-            {/* System Activity Log */}
-            <NotificationActivityFeed userRole="admin" maxItems={10} />
+            {/* Recent Activity */}
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
+              <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="text-2xl">🔔</span>
+                Recent Activity
+              </h2>
+              {activities.length > 0 ? (
+                <div className="space-y-3">
+                  {activities.slice(0, 5).map((activity) => (
+                    <div
+                      key={activity.id}
+                      onClick={activity.onClick}
+                      className="flex items-start gap-3 p-4 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 rounded-xl cursor-pointer transition-all border border-transparent hover:border-gray-200"
+                    >
+                      <div className={`p-3 rounded-xl ${
+                        activity.color === 'green' ? 'bg-green-100' :
+                        activity.color === 'blue' ? 'bg-blue-100' :
+                        activity.color === 'purple' ? 'bg-purple-100' :
+                        activity.color === 'orange' ? 'bg-orange-100' :
+                        'bg-gray-100'
+                      }`}>
+                        <activity.icon className={`${
+                          activity.color === 'green' ? 'text-green-600' :
+                          activity.color === 'blue' ? 'text-blue-600' :
+                          activity.color === 'purple' ? 'text-purple-600' :
+                          activity.color === 'orange' ? 'text-orange-600' :
+                          'text-gray-600'
+                        }`} size={20} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 text-sm">{activity.title}</p>
+                        <p className="text-xs text-gray-600 mt-1">{activity.description}</p>
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                          <span>🕐</span>
+                          {activity.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-3">📭</div>
+                  <p className="text-gray-500 text-sm">No recent activities</p>
+                </div>
+              )}
+            </div>
           </div>
         </main>
       </div>
