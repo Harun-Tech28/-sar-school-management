@@ -321,6 +321,11 @@ export function Sidebar({ userRole }: SidebarProps) {
           icon: LayoutDashboard,
         },
         {
+          label: "My Children",
+          href: `/dashboard/${userRole}/children`,
+          icon: Users,
+        },
+        {
           label: "Announcements",
           href: `/dashboard/${userRole}/announcements`,
           icon: Bell,
