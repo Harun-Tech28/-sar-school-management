@@ -19,7 +19,7 @@ async function createQuickTestData() {
           password: hashedPassword,
           fullName: "System Administrator",
           role: "ADMIN",
-          isApproved: true
+          accountStatus: "ACTIVE"
         }
       })
       console.log("✅ Admin created: admin@school.com / admin123")
@@ -53,16 +53,14 @@ async function createQuickTestData() {
           password: hashedPassword,
           fullName: "John Teacher",
           role: "TEACHER",
-          isApproved: true
+          accountStatus: "ACTIVE"
         }
       })
 
       await prisma.teacher.create({
         data: {
           userId: teacherUser.id,
-          subject: "Mathematics",
-          qualification: "B.Ed",
-          experience: 5
+          subject: "Mathematics"
         }
       })
       console.log("✅ Teacher created: teacher@school.com / teacher123")
@@ -82,7 +80,7 @@ async function createQuickTestData() {
             password: hashedPassword,
             fullName: `Student ${i}`,
             role: "STUDENT",
-            isApproved: true
+            accountStatus: "ACTIVE"
           }
         })
 
@@ -93,6 +91,7 @@ async function createQuickTestData() {
             classId: classes[i % classes.length].id,
             dateOfBirth: new Date(2010, 0, i),
             gender: i % 2 === 0 ? "MALE" : "FEMALE",
+            address: "Test Address",
             admissionDate: new Date()
           }
         })
@@ -114,7 +113,7 @@ async function createQuickTestData() {
           password: hashedPassword,
           fullName: "Parent User",
           role: "PARENT",
-          isApproved: true
+          accountStatus: "ACTIVE"
         }
       })
 
