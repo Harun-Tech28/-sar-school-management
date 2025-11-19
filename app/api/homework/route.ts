@@ -91,7 +91,6 @@ export async function POST(request: NextRequest) {
         teacherId,
         dueDate: new Date(dueDate),
         subject: subject || "",
-        attachments: attachments || [],
       },
       include: {
         teacher: {
