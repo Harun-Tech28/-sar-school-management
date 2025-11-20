@@ -16,15 +16,15 @@
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.20 0 0);
   
-  /* Primary - SAR Red (#E31E24) - Main brand color */
-  --primary: oklch(0.55 0.24 20);
+  /* Primary - SAR Red (#DC1E28) - Main brand color from logo */
+  --primary: oklch(0.52 0.22 20);
   --primary-foreground: oklch(0.99 0 0);
-  --primary-hover: oklch(0.48 0.24 20);
+  --primary-hover: oklch(0.45 0.22 20);
   
-  /* Secondary - SAR Yellow (#FFD100) - Accent color */
-  --secondary: oklch(0.88 0.18 95);
+  /* Secondary - SAR Gold (#FDB913) - Accent color from logo */
+  --secondary: oklch(0.82 0.16 85);
   --secondary-foreground: oklch(0.20 0 0);
-  --secondary-hover: oklch(0.82 0.18 95);
+  --secondary-hover: oklch(0.75 0.16 85);
   
   /* Muted - Soft neutrals */
   --muted: oklch(0.96 0.005 20);
@@ -34,16 +34,16 @@
   --accent: oklch(0.88 0.18 95);
   --accent-foreground: oklch(0.20 0 0);
   
-  /* Success - Green */
-  --success: oklch(0.65 0.20 145);
-  --success-foreground: oklch(0.99 0 0);
+  /* Success - SAR Gold (positive actions) */
+  --success: oklch(0.82 0.16 85);
+  --success-foreground: oklch(0.20 0 0);
   
-  /* Warning - Orange (between red and yellow) */
-  --warning: oklch(0.75 0.18 60);
+  /* Warning - SAR Gold (attention needed) */
+  --warning: oklch(0.88 0.18 95);
   --warning-foreground: oklch(0.20 0 0);
   
-  /* Destructive - Darker red */
-  --destructive: oklch(0.50 0.24 20);
+  /* Destructive - SAR Red (danger) */
+  --destructive: oklch(0.52 0.22 20);
   --destructive-foreground: oklch(0.99 0 0);
   
   /* Borders and inputs */
@@ -51,12 +51,12 @@
   --input: oklch(0.97 0.005 20);
   --ring: oklch(0.55 0.24 20);
   
-  /* Chart colors - Logo-inspired palette */
-  --chart-1: oklch(0.55 0.24 20);   /* SAR Red */
-  --chart-2: oklch(0.88 0.18 95);   /* SAR Yellow */
-  --chart-3: oklch(0.65 0.20 145);  /* Success Green */
-  --chart-4: oklch(0.60 0.20 240);  /* Info Blue */
-  --chart-5: oklch(0.75 0.18 60);   /* Warning Orange */
+  /* Chart colors - SAR Brand Only */
+  --chart-1: oklch(0.55 0.24 20);   /* SAR Red - Primary */
+  --chart-2: oklch(0.88 0.18 95);   /* SAR Gold - Secondary */
+  --chart-3: oklch(0.45 0.22 20);   /* SAR Dark Red */
+  --chart-4: oklch(0.75 0.16 85);   /* SAR Dark Gold */
+  --chart-5: oklch(0.62 0.25 20);   /* SAR Medium Red */
   
   /* Border radius */
   --radius: 0.75rem;
@@ -71,10 +71,10 @@
   --sidebar-border: oklch(0.45 0.20 20);
   --sidebar-ring: oklch(0.88 0.18 95);
   
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, oklch(0.55 0.24 20) 0%, oklch(0.48 0.24 20) 100%);
-  --gradient-secondary: linear-gradient(135deg, oklch(0.88 0.18 95) 0%, oklch(0.82 0.18 95) 100%);
-  --gradient-hero: linear-gradient(135deg, oklch(0.55 0.24 20) 0%, oklch(0.88 0.18 95) 100%);
+  /* Gradients - SAR Brand */
+  --gradient-primary: linear-gradient(135deg, oklch(0.52 0.22 20) 0%, oklch(0.45 0.22 20) 100%);
+  --gradient-secondary: linear-gradient(135deg, oklch(0.82 0.16 85) 0%, oklch(0.75 0.16 85) 100%);
+  --gradient-hero: linear-gradient(135deg, oklch(0.52 0.22 20) 0%, oklch(0.82 0.16 85) 100%);
 }
 
 .dark {
@@ -167,6 +167,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -175,6 +177,38 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Enhanced shadows from design tokens */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-glow-primary: 0 0 20px rgb(14 165 233 / 0.5);
+  --shadow-glow-success: 0 0 20px rgb(34 197 94 / 0.5);
+  --shadow-glow-warning: 0 0 20px rgb(245 158 11 / 0.5);
+  --shadow-glow-error: 0 0 20px rgb(239 68 68 / 0.5);
+  --shadow-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  --shadow-elevation-2: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --shadow-elevation-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --shadow-elevation-4: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --shadow-elevation-5: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+  
+  /* Animation durations */
+  --duration-fastest: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --duration-slowest: 500ms;
+  
+  /* Animation easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-bounce: cubic-bezier(0.68, -0.6, 0.32, 1.6);
 }
 
 @layer base {
@@ -206,7 +240,7 @@
 }
 
 @layer utilities {
-  /* Gradient backgrounds */
+  /* Gradient backgrounds - SAR Brand Only */
   .bg-gradient-primary {
     background: var(--gradient-primary);
   }
@@ -219,7 +253,28 @@
     background: var(--gradient-hero);
   }
   
-  /* Text gradients */
+  /* All other gradients use SAR colors */
+  .bg-gradient-purple {
+    background: linear-gradient(135deg, oklch(0.52 0.22 20) 0%, oklch(0.45 0.22 20) 100%);
+  }
+  
+  .bg-gradient-blue {
+    background: linear-gradient(135deg, oklch(0.55 0.24 20) 0%, oklch(0.82 0.16 85) 100%);
+  }
+  
+  .bg-gradient-green {
+    background: linear-gradient(135deg, oklch(0.82 0.16 85) 0%, oklch(0.88 0.18 95) 100%);
+  }
+  
+  .bg-gradient-orange {
+    background: linear-gradient(135deg, oklch(0.88 0.18 95) 0%, oklch(0.52 0.22 20) 100%);
+  }
+  
+  .bg-gradient-pink {
+    background: linear-gradient(135deg, oklch(0.52 0.22 20) 0%, oklch(0.88 0.18 95) 100%);
+  }
+  
+  /* Text gradients - SAR Brand Only */
   .text-gradient-primary {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
@@ -229,6 +284,13 @@
   
   .text-gradient-secondary {
     background: var(--gradient-secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-hero {
+    background: var(--gradient-hero);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -247,6 +309,12 @@
     -webkit-backdrop-filter: blur(12px);
   }
   
+  .glass-light {
+    background: oklch(1 0 0 / 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
   /* Shadows with brand colors */
   .shadow-primary {
     box-shadow: 0 4px 14px 0 oklch(0.55 0.24 20 / 0.15);
@@ -260,14 +328,59 @@
     box-shadow: 0 4px 14px 0 oklch(0.65 0.20 145 / 0.15);
   }
   
+  /* Enhanced shadow utilities */
+  .shadow-glow-primary {
+    box-shadow: var(--shadow-glow-primary);
+  }
+  
+  .shadow-glow-success {
+    box-shadow: var(--shadow-glow-success);
+  }
+  
+  .shadow-glow-warning {
+    box-shadow: var(--shadow-glow-warning);
+  }
+  
+  .shadow-glow-error {
+    box-shadow: var(--shadow-glow-error);
+  }
+  
+  .shadow-elevation-1 {
+    box-shadow: var(--shadow-elevation-1);
+  }
+  
+  .shadow-elevation-2 {
+    box-shadow: var(--shadow-elevation-2);
+  }
+  
+  .shadow-elevation-3 {
+    box-shadow: var(--shadow-elevation-3);
+  }
+  
+  .shadow-elevation-4 {
+    box-shadow: var(--shadow-elevation-4);
+  }
+  
+  .shadow-elevation-5 {
+    box-shadow: var(--shadow-elevation-5);
+  }
+  
   /* Hover effects */
   .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
   }
   
   .hover-lift:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px 0 oklch(0 0 0 / 0.1);
+  }
+  
+  .hover-glow {
+    transition: box-shadow var(--duration-normal) var(--ease-out);
+  }
+  
+  .hover-glow:hover {
+    box-shadow: var(--shadow-glow-primary);
   }
   
   /* Animated gradient border */
@@ -322,6 +435,36 @@
       oklch(0.96 0.005 20) 100%
     );
     background-size: 1000px 100%;
+  }
+  
+  /* Transition utilities with design tokens */
+  .transition-fastest {
+    transition-duration: var(--duration-fastest);
+  }
+  
+  .transition-fast {
+    transition-duration: var(--duration-fast);
+  }
+  
+  .transition-normal {
+    transition-duration: var(--duration-normal);
+  }
+  
+  .transition-slow {
+    transition-duration: var(--duration-slow);
+  }
+  
+  .transition-slowest {
+    transition-duration: var(--duration-slowest);
+  }
+  
+  /* Easing utilities */
+  .ease-spring {
+    transition-timing-function: var(--ease-spring);
+  }
+  
+  .ease-bounce {
+    transition-timing-function: var(--ease-bounce);
   }
 }
 
